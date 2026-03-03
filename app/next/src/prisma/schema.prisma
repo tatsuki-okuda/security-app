@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum DrillStatus {
+  draft
+  deliverable
+  delivering
+  sent
+  stopped
+  failed
+}
+
+enum DeliveryStatus {
+  pending
+  scheduled
+  sent
+  failed
+  bounced
+  cancelled
+}
+
+enum InteractionType {
+  send
+  click
+  learn
+  quiz_start
+  quiz_submit
+  complete
+  opt_out
+}
+
+enum QuestionType {
+  single_choice
+  multiple_choice
+  text
+}
+
+enum ApprovalAction {
+  submit
+  approve
+  reject
+  stop
+  fail
+}
+
+enum OptOutStatus {
+  requested
+  accepted
+  revoked
+}
+
+model User {
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String   @unique
+  slackUserId String?  @unique @map("slack_user_id")
+  role        Role     @default(user)
+  optedOut    Boolean  @default(false) @map("opted_out")
+  optOutReason String? @map("opt_out_reason")
+  optedOutAt  DateTime? @map("opted_out_at")
+  consentedAt DateTime? @map("consented_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  drillsCreated   Drill[]          @relation("DrillCreator")
+  drillsUpdated   Drill[]          @relation("DrillUpdater")
+  drillRecipients DrillRecipient[]
+  interactions    Interaction[]
+  quizAttempts    QuizAttempt[]
+  approvalHistory ApprovalHistory[]
+  optOutRequests  OptOutRequest[]
+
+  @@map("users")
+}
+
+model Drill {
+  id           String      @id @default(uuid()) @db.Uuid
+  title        String
+  scenarioId   String?     @map("scenario_id")
+  status       DrillStatus @default(draft)
+  channel      String
+  subject      String
+  body         String
+  guidanceText String      @map("guidance_text")
+  scheduledAt  DateTime?   @map("scheduled_at")
+  sentAt       DateTime?   @map("sent_at")
+  createdBy    String?     @db.Uuid @map("created_by")
+  updatedBy    String?     @db.Uuid @map("updated_by")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  creator        User?           @relation("DrillCreator", fields: [createdBy], references: [id])
+  updater        User?           @relation("DrillUpdater", fields: [updatedBy], references: [id])
+  trackingTokens TrackingToken[]
+  drillRecipients DrillRecipient[]
+  interactions   Interaction[]
+  quizQuestions  QuizQuestion[]
+  quizAttempts   QuizAttempt[]
+  approvalHistory ApprovalHistory[]
+
+  @@index([status])
+  @@index([channel])
+  @@index([sentAt])
+  @@map("drills")
+}
+
+model TrackingToken {
+  id               String   @id @default(uuid()) @db.Uuid
+  drillId          String   @db.Uuid @map("drill_id")
+  drillRecipientId String?  @db.Uuid @map("drill_recipient_id")
+  token            String   @unique
+  expiresAt        DateTime? @map("expires_at")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  drill          Drill           @relation(fields: [drillId], references: [id])
+  drillRecipient DrillRecipient? @relation(fields: [drillRecipientId], references: [id])
+  interactions   Interaction[]
+
+  @@index([drillId])
+  @@map("tracking_tokens")
+}
+
+model DrillRecipient {
+  id                String         @id @default(uuid()) @db.Uuid
+  drillId           String         @db.Uuid @map("drill_id")
+  userId            String         @db.Uuid @map("user_id")
+  deliveryChannelId String         @db.Uuid @map("delivery_channel_id")
+  deliveryStatus    DeliveryStatus @default(pending) @map("delivery_status")
+  deliveryError     String?        @map("delivery_error")
+  deliveredAt       DateTime?      @map("delivered_at")
+  clickedAt         DateTime?      @map("clicked_at")
+  learnedAt         DateTime?      @map("learned_at")
+  createdAt         DateTime       @default(now()) @map("created_at")
+
+  drill           Drill           @relation(fields: [drillId], references: [id])
+  user            User            @relation(fields: [userId], references: [id])
+  deliveryChannel DeliveryChannel @relation(fields: [deliveryChannelId], references: [id])
+  trackingTokens  TrackingToken[]
+
+  @@unique([drillId, userId, deliveryChannelId])
+  @@index([drillId])
+  @@index([userId])
+  @@index([deliveryStatus])
+  @@index([deliveryChannelId])
+  @@map("drill_recipients")
+}
+
+model DeliveryChannel {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  drillRecipients DrillRecipient[]
+
+  @@map("delivery_channels")
+}
+
+model Interaction {
+  id              String          @id @default(uuid()) @db.Uuid
+  drillId         String          @db.Uuid @map("drill_id")
+  userId          String?         @db.Uuid @map("user_id")
+  trackingTokenId String?         @db.Uuid @map("tracking_token_id")
+  type            InteractionType
+  metadata        Json?
+  occurredAt      DateTime        @default(now()) @map("occurred_at")
+
+  drill         Drill          @relation(fields: [drillId], references: [id])
+  user          User?          @relation(fields: [userId], references: [id])
+  trackingToken TrackingToken? @relation(fields: [trackingTokenId], references: [id])
+
+  @@index([drillId, type, occurredAt], map: "idx_interactions_drill_type_time")
+  @@index([userId, occurredAt], map: "idx_interactions_user_time")
+  @@map("interactions")
+}
+
+model QuizQuestion {
+  id           String       @id @default(uuid()) @db.Uuid
+  drillId      String       @db.Uuid @map("drill_id")
+  order        Int
+  questionType QuestionType @default(single_choice) @map("question_type")
+  questionText String       @map("question_text")
+  explanation  String
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  drill    Drill       @relation(fields: [drillId], references: [id])
+  options  QuizOption[]
+  answers  QuizAnswer[]
+
+  @@index([drillId, order], map: "idx_quiz_questions_drill_order")
+  @@map("quiz_questions")
+}
+
+model QuizOption {
+  id         String   @id @default(uuid()) @db.Uuid
+  questionId String   @db.Uuid @map("question_id")
+  label      String
+  optionText String   @map("option_text")
+  isCorrect  Boolean  @default(false) @map("is_correct")
+
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+  answers  QuizAnswer[]
+
+  @@index([questionId], map: "idx_quiz_options_question")
+  @@index([questionId, isCorrect], map: "idx_quiz_options_correct")
+  @@map("quiz_options")
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid()) @db.Uuid
+  drillId     String   @db.Uuid @map("drill_id")
+  userId      String   @db.Uuid @map("user_id")
+  attemptNo   Int      @map("attempt_no")
+  score       Int      @default(0)
+  isPassed    Boolean  @map("is_passed")
+  startedAt   DateTime @default(now()) @map("started_at")
+  submittedAt DateTime? @map("submitted_at")
+  feedback    Json?
+
+  drill   Drill      @relation(fields: [drillId], references: [id])
+  user    User       @relation(fields: [userId], references: [id])
+  answers QuizAnswer[]
+
+  @@unique([drillId, userId, attemptNo])
+  @@index([userId, drillId, submittedAt], map: "idx_quiz_attempts_user_drill")
+  @@index([drillId, isPassed], map: "idx_quiz_attempts_passed")
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id                String   @id @default(uuid()) @db.Uuid
+  attemptId         String   @db.Uuid @map("attempt_id")
+  questionId        String   @db.Uuid @map("question_id")
+  selectedOptionId  String?  @db.Uuid @map("selected_option_id")
+  selectedOptionIds Json?    @map("selected_option_ids")
+  textAnswer        String?  @map("text_answer")
+  isCorrect         Boolean
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id])
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+  option   QuizOption?  @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId], map: "idx_quiz_answers_attempt")
+  @@index([questionId], map: "idx_quiz_answers_question")
+  @@map("quiz_answers")
+}
+
+model ApprovalHistory {
+  id          String         @id @default(uuid()) @db.Uuid
+  drillId     String         @db.Uuid @map("drill_id")
+  action      ApprovalAction
+  actorUserId String         @db.Uuid @map("actor_user_id")
+  note        String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  drill Drill @relation(fields: [drillId], references: [id])
+  actor User  @relation(fields: [actorUserId], references: [id])
+
+  @@index([drillId, createdAt], map: "idx_approval_history_drill")
+  @@map("approval_history")
+}
+
+model OptOutRequest {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String       @db.Uuid @map("user_id")
+  reason      String?
+  status      OptOutStatus @default(requested)
+  requestedAt DateTime     @default(now()) @map("requested_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, requestedAt], map: "idx_opt_out_user")
+  @@map("opt_out_requests")
+}
