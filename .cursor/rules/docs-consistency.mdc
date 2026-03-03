@@ -1,0 +1,34 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Docs Consistency Guard
+
+目的: ドキュメント修正時の矛盾・更新漏れを防ぎ、カーソル/LLMが常に最新の情報を参照できるようにする。
+
+## 正とするドキュメント
+- 画面仕様/遷移: `doc/screenConfiguration.md`（最新版。`doc/tmp.md`はドラフト）
+- データモデル: `doc/database.md`
+- アーキ思想/依存関係: `doc/architecture.md`
+- プロダクト概要/MVP範囲: `doc/product.md`
+- 訓練フロー: `doc/drills/drillStatusFlow.md`
+- クイズ仕様/採点: `doc/drills/quizSpecification.md`
+- LLM/プロンプト: `doc/features/promptStrategy.md`
+- Next.js/React実装: `doc/next.md`
+- 目次・導線: `doc/README.md`（本ファイル）
+
+## 修正時のチェックリスト
+1) 変更が他文書に影響するか確認し、該当箇所を同時更新する。
+2) `doc/README.md` の「ドキュメント一覧」「読み順」「FAQ」「アセット」が影響する場合は必ず追従。
+3) 画面仕様を触る場合は `doc/screenConfiguration.md` を単一のソースとし、`doc/tmp.md` は補助メモにとどめる。
+4) ステータス/遷移/採点に触る場合は `doc/drills/drillStatusFlow.md` / `doc/drills/quizSpecification.md` を更新し、必要なら `doc/database.md` のテーブル・インデックスにも反映。
+5) データ項目や依存関係を追加/変更したら `doc/architecture.md` と `doc/database.md` の対応箇所を同期。
+6) LLMやプロンプト方針を変えたら `doc/features/promptStrategy.md` と関連画面説明（screenConfiguration内の学習/クイズ説明）を確認。
+7) 新規画像・図を追加したら `doc/assets/` に置き、`doc/README.md` のアセット表に追記。
+8) 新規ドキュメントを作るときは `doc/README.md` のディレクトリツリーと各テーブルに追加し、関連する既存ドキュメントからリンクを張る。
+9) 一時的なメモは `doc/tmp.md` に置き、確定後は正規ドキュメントへ移す。
+
+## 運用メモ
+- 不一致を見つけた場合は「正とするドキュメント」を優先し、他を揃える。
+- 迷ったときは `screenConfiguration.md` → `database.md` → `architecture.md` の順に整合を取る。
