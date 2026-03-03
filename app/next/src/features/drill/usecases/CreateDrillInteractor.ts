@@ -1,0 +1,32 @@
+import { err, ok } from '../../../shared/fp/result';
+
+import { defaultQuizTemplate } from '../domain/quizTemplates';
+
+import { CreateDrillUseCase } from './CreateDrillUseCase';
+import { DrillRepository } from './gateway/DrillRepository';
+
+export type CreateDrillDeps = { repo: DrillRepository };
+
+export const createCreateDrillInteractor =
+  ({ repo }: CreateDrillDeps): CreateDrillUseCase =>
+  async (input) => {
+    if (!input.title.trim()) {
+      return err({ type: 'VALIDATION', fieldErrors: { title: ['訓練名を入力してください'] } });
+    }
+
+    const result = await repo.createDrillWithQuiz({
+      title: input.title,
+      scenarioType: input.scenarioType,
+      channel: input.channel,
+      subject: input.subject,
+      body: input.body,
+      guidanceText: input.guidanceText,
+      quiz: defaultQuizTemplate,
+    });
+
+    if (!result.ok) {
+      return err({ type: 'REPO', message: result.error.message });
+    }
+
+    return ok({ drillId: result.value.drillId });
+  };
