@@ -1,0 +1,33 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "../root"
+    },
+    {
+      "name": "next",
+      "path": "../app/next",
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true
+      }
+    },
+    {
+      "name": "nestJs",
+      "path": "../app/nestJs",
+      "settings": {
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true
+      }
+    },
+  ],
+  "settings": {
+    // グローバル設定（全フォルダに適用）
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "typescript.preferences.useAliasesForRenames": false,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "cSpell.words": [
+      "usecases"
+    ]
+  }
+}
