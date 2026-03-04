@@ -7,6 +7,8 @@ export default async function Page() {
   const c = createContainer();
   const result = await c.admin.usecases.listUsers();
 
+  const adminEmails = process.env.AUTH_ADMIN_EMAILS?.split(',').map((e) => e.trim()) || [];
+
   if (!result.ok) {
     return (
       <main className="mx-auto mt-12 max-w-3xl space-y-3 px-4 sm:px-0">
@@ -44,7 +46,11 @@ export default async function Page() {
                   </Link>
                 </td>
                 <td className="px-4 py-3">
-                  <UserRoleForm userId={user.id} initialRole={user.role} />
+                  <UserRoleForm
+                    userId={user.id}
+                    initialRole={user.role}
+                    isDisabled={adminEmails.includes(user.email)}
+                  />
                 </td>
                 <td className="px-4 py-3 text-slate-600">{user.latestStatus}</td>
                 <td className="px-4 py-3 text-slate-600">{user.optedOut ? '停止中' : '有効'}</td>
