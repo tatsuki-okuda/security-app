@@ -60,19 +60,25 @@ enum OptOutStatus {
 }
 
 model User {
-  id          String   @id @default(uuid()) @db.Uuid
-  email       String   @unique
-  slackUserId String?  @unique @map("slack_user_id")
-  role        Role     @default(user)
-  optedOut    Boolean  @default(false) @map("opted_out")
-  optOutReason String? @map("opt_out_reason")
-  optedOutAt  DateTime? @map("opted_out_at")
-  consentedAt DateTime? @map("consented_at")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  slackUserId   String?   @unique @map("slack_user_id")
+  role          Role      @default(user)
+  optedOut      Boolean   @default(false) @map("opted_out")
+  optOutReason  String?   @map("opt_out_reason")
+  optedOutAt    DateTime? @map("opted_out_at")
+  consentedAt   DateTime? @map("consented_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  drillsCreated   Drill[]          @relation("DrillCreator")
-  drillsUpdated   Drill[]          @relation("DrillUpdater")
+  accounts Account[]
+  sessions Session[]
+
+  drillsCreated   Drill[]           @relation("DrillCreator")
+  drillsUpdated   Drill[]           @relation("DrillUpdater")
   drillRecipients DrillRecipient[]
   interactions    Interaction[]
   quizAttempts    QuizAttempt[]
@@ -93,18 +99,18 @@ model Drill {
   guidanceText String      @map("guidance_text")
   scheduledAt  DateTime?   @map("scheduled_at")
   sentAt       DateTime?   @map("sent_at")
-  createdBy    String?     @db.Uuid @map("created_by")
-  updatedBy    String?     @db.Uuid @map("updated_by")
+  createdBy    String?     @map("created_by") @db.Uuid
+  updatedBy    String?     @map("updated_by") @db.Uuid
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
 
-  creator        User?           @relation("DrillCreator", fields: [createdBy], references: [id])
-  updater        User?           @relation("DrillUpdater", fields: [updatedBy], references: [id])
-  trackingTokens TrackingToken[]
+  creator         User?             @relation("DrillCreator", fields: [createdBy], references: [id])
+  updater         User?             @relation("DrillUpdater", fields: [updatedBy], references: [id])
+  trackingTokens  TrackingToken[]
   drillRecipients DrillRecipient[]
-  interactions   Interaction[]
-  quizQuestions  QuizQuestion[]
-  quizAttempts   QuizAttempt[]
+  interactions    Interaction[]
+  quizQuestions   QuizQuestion[]
+  quizAttempts    QuizAttempt[]
   approvalHistory ApprovalHistory[]
 
   @@index([status])
@@ -114,13 +120,13 @@ model Drill {
 }
 
 model TrackingToken {
-  id               String   @id @default(uuid()) @db.Uuid
-  drillId          String   @db.Uuid @map("drill_id")
-  drillRecipientId String?  @db.Uuid @map("drill_recipient_id")
-  token            String   @unique
+  id               String    @id @default(uuid()) @db.Uuid
+  drillId          String    @map("drill_id") @db.Uuid
+  drillRecipientId String?   @map("drill_recipient_id") @db.Uuid
+  token            String    @unique
   expiresAt        DateTime? @map("expires_at")
-  isActive         Boolean  @default(true) @map("is_active")
-  createdAt        DateTime @default(now()) @map("created_at")
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
   drill          Drill           @relation(fields: [drillId], references: [id])
   drillRecipient DrillRecipient? @relation(fields: [drillRecipientId], references: [id])
@@ -132,9 +138,9 @@ model TrackingToken {
 
 model DrillRecipient {
   id                String         @id @default(uuid()) @db.Uuid
-  drillId           String         @db.Uuid @map("drill_id")
-  userId            String         @db.Uuid @map("user_id")
-  deliveryChannelId String         @db.Uuid @map("delivery_channel_id")
+  drillId           String         @map("drill_id") @db.Uuid
+  userId            String         @map("user_id") @db.Uuid
+  deliveryChannelId String         @map("delivery_channel_id") @db.Uuid
   deliveryStatus    DeliveryStatus @default(pending) @map("delivery_status")
   deliveryError     String?        @map("delivery_error")
   deliveredAt       DateTime?      @map("delivered_at")
@@ -171,9 +177,9 @@ model DeliveryChannel {
 
 model Interaction {
   id              String          @id @default(uuid()) @db.Uuid
-  drillId         String          @db.Uuid @map("drill_id")
-  userId          String?         @db.Uuid @map("user_id")
-  trackingTokenId String?         @db.Uuid @map("tracking_token_id")
+  drillId         String          @map("drill_id") @db.Uuid
+  userId          String?         @map("user_id") @db.Uuid
+  trackingTokenId String?         @map("tracking_token_id") @db.Uuid
   type            InteractionType
   metadata        Json?
   occurredAt      DateTime        @default(now()) @map("occurred_at")
@@ -189,27 +195,27 @@ model Interaction {
 
 model QuizQuestion {
   id           String       @id @default(uuid()) @db.Uuid
-  drillId      String       @db.Uuid @map("drill_id")
+  drillId      String       @map("drill_id") @db.Uuid
   order        Int
   questionType QuestionType @default(single_choice) @map("question_type")
   questionText String       @map("question_text")
   explanation  String
   createdAt    DateTime     @default(now()) @map("created_at")
 
-  drill    Drill       @relation(fields: [drillId], references: [id])
-  options  QuizOption[]
-  answers  QuizAnswer[]
+  drill   Drill        @relation(fields: [drillId], references: [id])
+  options QuizOption[]
+  answers QuizAnswer[]
 
   @@index([drillId, order], map: "idx_quiz_questions_drill_order")
   @@map("quiz_questions")
 }
 
 model QuizOption {
-  id         String   @id @default(uuid()) @db.Uuid
-  questionId String   @db.Uuid @map("question_id")
+  id         String  @id @default(uuid()) @db.Uuid
+  questionId String  @map("question_id") @db.Uuid
   label      String
-  optionText String   @map("option_text")
-  isCorrect  Boolean  @default(false) @map("is_correct")
+  optionText String  @map("option_text")
+  isCorrect  Boolean @default(false) @map("is_correct")
 
   question QuizQuestion @relation(fields: [questionId], references: [id])
   answers  QuizAnswer[]
@@ -220,18 +226,18 @@ model QuizOption {
 }
 
 model QuizAttempt {
-  id          String   @id @default(uuid()) @db.Uuid
-  drillId     String   @db.Uuid @map("drill_id")
-  userId      String   @db.Uuid @map("user_id")
-  attemptNo   Int      @map("attempt_no")
-  score       Int      @default(0)
-  isPassed    Boolean  @map("is_passed")
-  startedAt   DateTime @default(now()) @map("started_at")
+  id          String    @id @default(uuid()) @db.Uuid
+  drillId     String    @map("drill_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  attemptNo   Int       @map("attempt_no")
+  score       Int       @default(0)
+  isPassed    Boolean   @map("is_passed")
+  startedAt   DateTime  @default(now()) @map("started_at")
   submittedAt DateTime? @map("submitted_at")
   feedback    Json?
 
-  drill   Drill      @relation(fields: [drillId], references: [id])
-  user    User       @relation(fields: [userId], references: [id])
+  drill   Drill        @relation(fields: [drillId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
   answers QuizAnswer[]
 
   @@unique([drillId, userId, attemptNo])
@@ -241,12 +247,12 @@ model QuizAttempt {
 }
 
 model QuizAnswer {
-  id                String   @id @default(uuid()) @db.Uuid
-  attemptId         String   @db.Uuid @map("attempt_id")
-  questionId        String   @db.Uuid @map("question_id")
-  selectedOptionId  String?  @db.Uuid @map("selected_option_id")
-  selectedOptionIds Json?    @map("selected_option_ids")
-  textAnswer        String?  @map("text_answer")
+  id                String  @id @default(uuid()) @db.Uuid
+  attemptId         String  @map("attempt_id") @db.Uuid
+  questionId        String  @map("question_id") @db.Uuid
+  selectedOptionId  String? @map("selected_option_id") @db.Uuid
+  selectedOptionIds Json?   @map("selected_option_ids")
+  textAnswer        String? @map("text_answer")
   isCorrect         Boolean
 
   attempt  QuizAttempt  @relation(fields: [attemptId], references: [id])
@@ -261,9 +267,9 @@ model QuizAnswer {
 
 model ApprovalHistory {
   id          String         @id @default(uuid()) @db.Uuid
-  drillId     String         @db.Uuid @map("drill_id")
+  drillId     String         @map("drill_id") @db.Uuid
   action      ApprovalAction
-  actorUserId String         @db.Uuid @map("actor_user_id")
+  actorUserId String         @map("actor_user_id") @db.Uuid
   note        String?
   createdAt   DateTime       @default(now()) @map("created_at")
 
@@ -276,7 +282,7 @@ model ApprovalHistory {
 
 model OptOutRequest {
   id          String       @id @default(uuid()) @db.Uuid
-  userId      String       @db.Uuid @map("user_id")
+  userId      String       @map("user_id") @db.Uuid
   reason      String?
   status      OptOutStatus @default(requested)
   requestedAt DateTime     @default(now()) @map("requested_at")
@@ -286,4 +292,43 @@ model OptOutRequest {
 
   @@index([userId, requestedAt], map: "idx_opt_out_user")
   @@map("opt_out_requests")
+}
+
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
