@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createGetLearningIntroInteractor } from '../../usecases/GetLearningIntroInteractor';
+
 import type { LearningRepository } from '../../usecases/gateway/LearningRepository';
 
 const createRepo = (overrides?: Partial<LearningRepository>): LearningRepository => ({

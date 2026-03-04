@@ -1,9 +1,8 @@
 import { err, ok } from '../../../shared/fp/result';
-
 import { scoreQuiz } from '../domain/quizScoring';
 
-import { SubmitQuizUseCase } from './SubmitQuizUseCase';
 import { QuizRepository } from './gateway/QuizRepository';
+import { SubmitQuizUseCase } from './SubmitQuizUseCase';
 
 export type SubmitQuizDeps = { repo: QuizRepository };
 
@@ -50,7 +49,7 @@ export const createSubmitQuizInteractor =
 
     const scoreInput = quizResult.value.map((q) => ({
       id: q.id,
-      type: q.questionType === 'single_choice' ? 'radio' : 'checkbox',
+      type: (q.questionType === 'single_choice' ? 'radio' : 'checkbox') as 'radio' | 'checkbox',
       correctOptionIds: q.options.filter((opt) => opt.isCorrect).map((opt) => opt.id),
     }));
 

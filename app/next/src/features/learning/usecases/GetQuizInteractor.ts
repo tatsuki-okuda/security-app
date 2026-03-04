@@ -1,7 +1,7 @@
 import { err, ok } from '../../../shared/fp/result';
 
-import { GetQuizUseCase } from './GetQuizUseCase';
 import { QuizRepository } from './gateway/QuizRepository';
+import { GetQuizUseCase } from './GetQuizUseCase';
 
 export type GetQuizDeps = { repo: QuizRepository };
 
@@ -25,7 +25,7 @@ export const createGetQuizInteractor =
     const view = quizResult.value.map((q) => ({
       id: q.id,
       order: q.order,
-      type: q.questionType === 'single_choice' ? 'radio' : 'checkbox',
+      type: (q.questionType === 'single_choice' ? 'radio' : 'checkbox') as 'radio' | 'checkbox',
       questionText: q.questionText,
       explanation: q.explanation,
       options: q.options.map((opt) => ({

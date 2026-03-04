@@ -52,7 +52,12 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
         },
       });
 
-      return ok(questions);
+      return ok(
+        questions.map((q) => ({
+          ...q,
+          questionType: q.questionType as 'single_choice' | 'multiple_choice',
+        })),
+      );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
@@ -60,6 +65,8 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
   },
   getNextAttemptNo: async (drillId, userId) => {
     try {
+      if (!userId) return ok(1); // Provide a default if userId is null, though typically it shouldn't be
+
       const lastAttempt = await prisma.quizAttempt.findFirst({
         where: { drillId, userId },
         orderBy: { attemptNo: 'desc' },
@@ -97,9 +104,8 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
           data: answers.map((answer) => ({
             attemptId: createdAttempt.id,
             questionId: answer.questionId,
-            selectedOptionId:
-              answer.questionType === 'single_choice' ? answer.selectedOptionIds[0] ?? null : null,
-            selectedOptionIds: answer.questionType === 'multiple_choice' ? answer.selectedOptionIds : null,
+            selectedOptionId: answer.questionType === 'single_choice' ? (answer.selectedOptionIds[0] ?? null) : null,
+            selectedOptionIds: answer.questionType === 'multiple_choice' ? (answer.selectedOptionIds ? [...answer.selectedOptionIds] : []) : [],
             isCorrect: answer.isCorrect,
           })),
         });
@@ -137,6 +143,8 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
   },
   getLatestPassedAttempt: async (drillId, userId) => {
     try {
+      if (!userId) return ok(null);
+
       const attempt = await prisma.quizAttempt.findFirst({
         where: { drillId, userId, isPassed: true },
         orderBy: { submittedAt: 'desc' },
@@ -157,6 +165,8 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
   },
   getAttemptCount: async (drillId, userId) => {
     try {
+      if (!userId) return ok(0);
+
       const count = await prisma.quizAttempt.count({
         where: { drillId, userId },
       });

@@ -1,6 +1,7 @@
 import { prisma } from '@/prismaClient';
 
 import { err, ok } from '../../../../shared/fp/result';
+
 import type { AdminRepository } from '../../usecases/gateway/AdminRepository';
 
 export const createPrismaAdminRepository = (): AdminRepository => ({

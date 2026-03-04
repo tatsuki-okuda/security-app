@@ -33,12 +33,7 @@ export default async function Page({
         <p className="text-sm text-slate-600">すべての問題に回答してください。</p>
       </header>
 
-      <QuizForm
-        questions={result.value}
-        token={token}
-        drillId={drillId}
-        action={submitQuizAction}
-      />
+      <QuizForm questions={result.value} token={token} drillId={drillId} action={submitQuizAction} />
     </main>
   );
 }

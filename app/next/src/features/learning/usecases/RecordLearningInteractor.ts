@@ -1,7 +1,7 @@
 import { err, ok } from '../../../shared/fp/result';
 
-import { RecordLearningUseCase } from './RecordLearningUseCase';
 import { LearningRepository } from './gateway/LearningRepository';
+import { RecordLearningUseCase } from './RecordLearningUseCase';
 
 export type RecordLearningDeps = { repo: LearningRepository };
 

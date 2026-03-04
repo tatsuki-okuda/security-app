@@ -1,8 +1,8 @@
 import { err, ok } from '../../../shared/fp/result';
 
 import { GetLearningIntroInput } from './dto/GetLearningIntroInput';
-import { GetLearningIntroUseCase } from './GetLearningIntroUseCase';
 import { LearningRepository } from './gateway/LearningRepository';
+import { GetLearningIntroUseCase } from './GetLearningIntroUseCase';
 
 export type GetLearningIntroDeps = { repo: LearningRepository };
 

@@ -14,7 +14,7 @@ const initialState: CreateDrillActionState = { status: 'idle' };
 
 export const CreateDrillForm = ({ action, scenarios }: Props) => {
   const [state, formAction, isPending] = useActionState(action, initialState);
-  const fieldErrors = state.status === 'error' ? state.fieldErrors ?? {} : {};
+  const fieldErrors = state.status === 'error' ? (state.fieldErrors ?? {}) : {};
 
   return (
     <form action={formAction} className="space-y-6">

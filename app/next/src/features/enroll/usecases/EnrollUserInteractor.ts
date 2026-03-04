@@ -1,8 +1,8 @@
 import { ok, err } from '../../../shared/fp/result';
-
 import { makeEmail } from '../domain/email';
-import { EnrollUserUseCase } from './EnrollUserUseCase';
+
 import { EnrollUserInput } from './dto/EnrollUserInput';
+import { EnrollUserUseCase } from './EnrollUserUseCase';
 import { UserRepository } from './gateway/UserRepository';
 
 export type EnrollUserDeps = { repo: UserRepository };
