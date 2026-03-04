@@ -27,6 +27,7 @@ services:
     command: sh -c "npm ci && npx prisma generate --schema src/prisma/schema.prisma && npm run dev -- --hostname 0.0.0.0 --port 3000"
     ports:
       - "3000:3000"
+      - "5555:5555"
     environment:
       DATABASE_URL: postgresql://app:app@db:5432/app
       # ファイル監視を安定させるためにポーリングを有効化
