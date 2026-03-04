@@ -4,7 +4,15 @@ import { useRouter } from 'next/navigation';
 
 import { updateUserRoleAction } from '../../../app/admin/users/actions';
 
-export function UserRoleForm({ userId, initialRole }: { userId: string; initialRole: string }) {
+export function UserRoleForm({
+  userId,
+  initialRole,
+  isDisabled = false,
+}: {
+  userId: string;
+  initialRole: string;
+  isDisabled?: boolean;
+}) {
   const router = useRouter();
 
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -21,8 +29,13 @@ export function UserRoleForm({ userId, initialRole }: { userId: string; initialR
     <select
       defaultValue={initialRole}
       onChange={handleChange}
-      className={`rounded border border-slate-300 px-2 py-1 text-sm ${
-        initialRole === 'admin' ? 'bg-amber-50 text-amber-700' : 'bg-slate-50 text-slate-700'
+      disabled={isDisabled}
+      className={`rounded border px-2 py-1 text-sm ${
+        isDisabled
+          ? 'cursor-not-allowed border-none bg-transparent font-semibold text-slate-500' // マスター管理者の場合の見た目
+          : initialRole === 'admin'
+            ? 'border-slate-300 bg-amber-50 text-amber-700'
+            : 'border-slate-300 bg-slate-50 text-slate-700'
       }`}
     >
       <option value="user">User</option>

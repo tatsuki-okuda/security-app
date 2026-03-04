@@ -8,6 +8,8 @@ export default async function Page({ params }: { params: { id: string } }) {
   const c = createContainer();
   const result = await c.admin.usecases.getUserDetail(params.id);
 
+  const adminEmails = process.env.AUTH_ADMIN_EMAILS?.split(',').map((e) => e.trim()) || [];
+
   if (!result.ok) {
     if (result.error.type === 'NOT_FOUND') {
       notFound();
@@ -38,7 +40,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         </p>
         <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
           <span className="w-24 font-semibold">権限:</span>
-          <UserRoleForm userId={user.id} initialRole={user.role} />
+          <UserRoleForm userId={user.id} initialRole={user.role} isDisabled={adminEmails.includes(user.email)} />
         </div>
         <p className="mt-2 flex items-center gap-2 text-sm text-slate-600">
           <span className="w-24 font-semibold">Slack:</span> {user.slackUserId ?? '未登録'}
