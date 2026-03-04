@@ -4,8 +4,8 @@ import { useActionState } from 'react';
 
 import { QuizFormView } from './QuizFormView';
 
-import type { QuizViewQuestion } from '../usecases/GetQuizUseCase';
 import type { QuizActionState } from '../contracts/quiz';
+import type { QuizViewQuestion } from '../usecases/GetQuizUseCase';
 
 type Props = {
   questions: QuizViewQuestion[];

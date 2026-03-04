@@ -1,7 +1,7 @@
 import { InlineError } from '../../../shared/ui/components/InlineError';
 
-import type { QuizViewQuestion } from '../usecases/GetQuizUseCase';
 import type { QuizActionState } from '../contracts/quiz';
+import type { QuizViewQuestion } from '../usecases/GetQuizUseCase';
 
 type Props = {
   questions: QuizViewQuestion[];
@@ -23,14 +23,12 @@ export const QuizFormView = ({ questions, action, state, token, drillId, isPendi
 
       {questions.map((question) => {
         const fieldKey = `q_${question.id}`;
-        const fieldErrors = state.status === 'error' ? state.fieldErrors?.[fieldKey] ?? [] : [];
+        const fieldErrors = state.status === 'error' ? (state.fieldErrors?.[fieldKey] ?? []) : [];
 
         return (
           <section key={question.id} className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Question {question.order}
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Question {question.order}</p>
               <h2 className="text-lg font-semibold text-slate-900">{question.questionText}</h2>
             </div>
 

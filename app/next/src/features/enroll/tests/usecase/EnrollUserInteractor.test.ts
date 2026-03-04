@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createEnrollUserInteractor } from '../../usecases/EnrollUserInteractor';
+
 import type { UserRepository } from '../../usecases/gateway/UserRepository';
 
 const createRepo = (overrides?: Partial<UserRepository>): UserRepository => ({

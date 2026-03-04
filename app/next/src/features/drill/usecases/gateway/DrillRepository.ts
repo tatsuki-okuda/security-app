@@ -15,6 +15,7 @@ export type DrillRecipientToken = {
   email: string | null;
   slackUserId: string | null;
   token: string;
+  userId: string;
 };
 
 export type DrillRepository = {
@@ -40,6 +41,9 @@ export type DrillRepository = {
     drillRecipientId: string;
     error?: string | null;
   }) => Promise<Result<void, DrillRepoError>>;
-  updateDrillStatus: (input: { drillId: string; status: 'deliverable' | 'delivering' | 'sent' | 'failed' }) => Promise<Result<void, DrillRepoError>>;
+  updateDrillStatus: (input: {
+    drillId: string;
+    status: 'deliverable' | 'delivering' | 'sent' | 'failed';
+  }) => Promise<Result<void, DrillRepoError>>;
   recordSendInteraction: (input: { drillId: string; userId: string }) => Promise<Result<void, DrillRepoError>>;
 };

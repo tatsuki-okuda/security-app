@@ -1,5 +1,4 @@
 import { err, ok } from '../../../shared/fp/result';
-
 import { defaultQuizTemplate } from '../domain/quizTemplates';
 
 import { CreateDrillUseCase } from './CreateDrillUseCase';

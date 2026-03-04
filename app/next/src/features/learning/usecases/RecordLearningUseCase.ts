@@ -5,4 +5,7 @@ export type RecordLearningError =
   | { type: 'NOT_FOUND' }
   | { type: 'REPO'; message: string };
 
-export type RecordLearningUseCase = (input: { drillId: string; token: string }) => Promise<Result<void, RecordLearningError>>;
+export type RecordLearningUseCase = (input: {
+  drillId: string;
+  token: string;
+}) => Promise<Result<void, RecordLearningError>>;

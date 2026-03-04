@@ -46,9 +46,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-900">配信内容</h2>
         <p className="mt-2 text-sm text-slate-600">件名: {drill.subject}</p>
-        <div className="mt-3 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-          {drill.body}
-        </div>
+        <div className="mt-3 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">{drill.body}</div>
         <p className="mt-3 text-sm text-slate-600">誘導テキスト</p>
         <div className="mt-2 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
           {drill.guidanceText}

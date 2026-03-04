@@ -102,14 +102,12 @@ export const EnrollFormView = ({
               <input
                 id="consent"
                 type="checkbox"
-                {...register('consent', { valueAsBoolean: true })}
+                {...register('consent')}
                 className={formStyles.checkbox}
                 aria-invalid={hasConsentError}
                 aria-describedby={hasConsentError ? 'consent-errors' : undefined}
               />
-              <span className={formStyles.checkboxLabel}>
-                訓練の目的と内容を理解し、参加に同意します。
-              </span>
+              <span className={formStyles.checkboxLabel}>訓練の目的と内容を理解し、参加に同意します。</span>
             </label>
             <InlineError
               id="consent-errors"

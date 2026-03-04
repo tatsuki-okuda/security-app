@@ -1,8 +1,8 @@
 import { err, ok } from '../../../shared/fp/result';
 
 import { TrackClickInput } from './dto/TrackClickInput';
-import { TrackClickUseCase } from './TrackClickUseCase';
 import { TrackingRepository } from './gateway/TrackingRepository';
+import { TrackClickUseCase } from './TrackClickUseCase';
 
 export type TrackClickDeps = { repo: TrackingRepository };
 

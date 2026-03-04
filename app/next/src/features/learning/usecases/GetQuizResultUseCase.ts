@@ -10,4 +10,7 @@ export type GetQuizResultError =
   | { type: 'NOT_FOUND' }
   | { type: 'REPO'; message: string };
 
-export type GetQuizResultUseCase = (input: { drillId: string; token: string }) => Promise<Result<QuizResultOutput, GetQuizResultError>>;
+export type GetQuizResultUseCase = (input: {
+  drillId: string;
+  token: string;
+}) => Promise<Result<QuizResultOutput, GetQuizResultError>>;

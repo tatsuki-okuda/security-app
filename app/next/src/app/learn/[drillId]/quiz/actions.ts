@@ -6,10 +6,7 @@ import { createContainer } from '../../../../_di/container.server';
 
 import type { QuizActionState } from '../../../../features/learning/contracts/quiz';
 
-export const submitQuizAction = async (
-  _prev: QuizActionState,
-  formData: FormData,
-): Promise<QuizActionState> => {
+export const submitQuizAction = async (_prev: QuizActionState, formData: FormData): Promise<QuizActionState> => {
   const drillId = String(formData.get('drillId') ?? '');
   const token = String(formData.get('token') ?? '');
 

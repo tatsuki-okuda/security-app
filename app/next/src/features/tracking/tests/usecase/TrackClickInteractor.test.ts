@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createTrackClickInteractor } from '../../usecases/TrackClickInteractor';
+
 import type { TrackingRepository } from '../../usecases/gateway/TrackingRepository';
 
 const createRepo = (overrides?: Partial<TrackingRepository>): TrackingRepository => ({

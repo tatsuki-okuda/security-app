@@ -1,7 +1,7 @@
 import { err, ok } from '../../../shared/fp/result';
 
-import { GetQuizResultUseCase } from './GetQuizResultUseCase';
 import { QuizRepository } from './gateway/QuizRepository';
+import { GetQuizResultUseCase } from './GetQuizResultUseCase';
 
 export type GetQuizResultDeps = { repo: QuizRepository };
 
