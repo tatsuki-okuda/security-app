@@ -3,6 +3,7 @@ import { Result } from '../../../../shared/fp/result';
 export type UserListItem = {
   id: string;
   email: string;
+  role: string;
   optedOut: boolean;
   latestStatus: string;
 };
@@ -10,6 +11,7 @@ export type UserListItem = {
 export type UserDetail = {
   id: string;
   email: string;
+  role: string;
   slackUserId: string | null;
   optedOut: boolean;
   drills: Array<{
@@ -59,6 +61,7 @@ export type AdminRepoError = { type: 'DB'; message: string } | { type: 'UNKNOWN'
 export type AdminRepository = {
   listUsers: () => Promise<Result<UserListItem[], AdminRepoError>>;
   getUserDetail: (userId: string) => Promise<Result<UserDetail | null, AdminRepoError>>;
+  updateUserRole: (userId: string, role: string) => Promise<Result<void, AdminRepoError>>;
   listDrills: () => Promise<Result<DrillListItem[], AdminRepoError>>;
   getDrillDetail: (drillId: string) => Promise<Result<DrillDetail | null, AdminRepoError>>;
 };

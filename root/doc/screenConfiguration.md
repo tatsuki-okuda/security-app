@@ -45,7 +45,7 @@
 - **導線**
 - 訓練メールは **`/t/[token]` または `/learn/[token or drillId]` に直接リンク**
   - 学習ページ到達時に **クリック判定を記録**
-- **認証方式**
+- **認証方式**（詳細：[認証・認可仕様](./auth.md)）
   - パスワードレス前提：Google / LINE の外部プロバイダログインを使用（ユーザー入力はメール/Slack登録に限る）
   - セッションにロール（Admin/User）を含め、Middlewareで `/admin/**` を判定
 - **未ログイン時の挙動**
@@ -133,6 +133,8 @@
   - ユーザー一覧
   - メールアドレス
   - 最新訓練状況（未送信 / 未学習 / 合格）
+  - 権限（Role）の確認・変更（Admin / User）
+    - 一般ユーザーを Admin に昇格させる機能を備える
   - オプトアウト状態の確認と解除（再開）
     - ユーザーが `/settings/opt-out` で停止した場合、管理者が受信再開を指示できる
   - 個別詳細へのリンク（`/admin/users/[id]`）
@@ -150,7 +152,8 @@
 
 - `/admin/users/[id]`
 - 内容：
-  - 基本情報（メール、Slack ID など）
+  - 基本情報（メール、Slack ID、権限 など）
+  - 権限（Role）の変更（Admin / User）
   - 訓練履歴（Drillごとの送信日時・クリック有無）
   - 学習/クイズ結果（QuizAttemptのスコア・合否）
   - オプトアウト状態・再開操作
@@ -541,6 +544,7 @@
 
 - [アーキテクチャ概要](./architecture.md)
 - [プロダクト概要](./product.md)
+- [認証・認可仕様](./auth.md)
 - [訓練ステータス遷移フロー](./drills/drillStatusFlow.md)
 - [セキュリティクイズ仕様](./drills/quizSpecification.md)
 - [実装プラン](../plan/override.md)

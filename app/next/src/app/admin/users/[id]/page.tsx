@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { createContainer } from '../../../../_di/container.server';
+import { UserRoleForm } from '../../../../features/admin/_ui/UserRoleForm';
 
 export default async function Page({ params }: { params: { id: string } }) {
   const c = createContainer();
@@ -32,9 +33,19 @@ export default async function Page({ params }: { params: { id: string } }) {
       </header>
 
       <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-        <p className="text-sm text-slate-600">メール: {user.email}</p>
-        <p className="text-sm text-slate-600">Slack: {user.slackUserId ?? '未登録'}</p>
-        <p className="text-sm text-slate-600">オプトアウト: {user.optedOut ? '停止中' : '有効'}</p>
+        <p className="flex items-center gap-2 text-sm text-slate-600">
+          <span className="w-24 font-semibold">メール:</span> {user.email}
+        </p>
+        <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+          <span className="w-24 font-semibold">権限:</span>
+          <UserRoleForm userId={user.id} initialRole={user.role} />
+        </div>
+        <p className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+          <span className="w-24 font-semibold">Slack:</span> {user.slackUserId ?? '未登録'}
+        </p>
+        <p className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+          <span className="w-24 font-semibold">オプトアウト:</span> {user.optedOut ? '停止中' : '有効'}
+        </p>
       </section>
 
       <section className="space-y-3">
