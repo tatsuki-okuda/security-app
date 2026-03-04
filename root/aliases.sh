@@ -79,6 +79,7 @@ alias pmc-logs='_pmc logs -f'
 alias pmc-ps='_pmc ps'
 alias pmc-exec-next='_pmc exec next'
 alias pmc-exec-db='_pmc exec db'
+alias pmc-rebuild='_pmc build --no-cache'
 
 # Prisma関連のエイリアス
 alias pmc-prisma-migrate='pmc-exec-next npx prisma migrate dev --schema src/prisma/schema.prisma'
