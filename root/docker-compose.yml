@@ -28,20 +28,11 @@ services:
     ports:
       - "3000:3000"
       - "5555:5555"
+    env_file:
+      - ../app/next/.env
     environment:
-      DATABASE_URL: postgresql://app:app@db:5432/app
       # ファイル監視を安定させるためにポーリングを有効化
       WATCHPACK_POLLING: "true"
-      # Auth.js 導入までの暫定バイパス
-      AUTH_BYPASS: "true"
-      # 配信設定（SMTP/Slack）
-      APP_BASE_URL: "http://localhost:3000"
-      SMTP_HOST: "mailpit"
-      SMTP_PORT: "1025"
-      SMTP_USER: ""
-      SMTP_PASS: ""
-      MAIL_FROM: "no-reply@example.com"
-      SLACK_WEBHOOK_URL: ""
     depends_on:
       - db
       - mailpit
