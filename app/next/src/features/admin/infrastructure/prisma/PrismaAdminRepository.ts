@@ -12,6 +12,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
         select: {
           id: true,
           email: true,
+          role: true,
           optedOut: true,
           drillRecipients: {
             orderBy: { createdAt: 'desc' },
@@ -44,6 +45,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
         return {
           id: user.id,
           email: user.email,
+          role: user.role,
           optedOut: user.optedOut,
           latestStatus,
         };
@@ -62,6 +64,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
         select: {
           id: true,
           email: true,
+          role: true,
           slackUserId: true,
           optedOut: true,
         },
@@ -106,10 +109,24 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
       return ok({
         id: user.id,
         email: user.email,
+        role: user.role,
         slackUserId: user.slackUserId,
         optedOut: user.optedOut,
         drills,
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
+    }
+  },
+  updateUserRole: async (userId, role) => {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: { role: role as any },
+      });
+      return ok(undefined);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });

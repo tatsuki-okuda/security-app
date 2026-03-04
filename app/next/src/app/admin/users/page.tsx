@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { createContainer } from '../../../_di/container.server';
+import { UserRoleForm } from '../../../features/admin/_ui/UserRoleForm';
 
 export default async function Page() {
   const c = createContainer();
@@ -29,6 +30,7 @@ export default async function Page() {
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">メール</th>
+              <th className="px-4 py-3">権限</th>
               <th className="px-4 py-3">最新状況</th>
               <th className="px-4 py-3">オプトアウト</th>
             </tr>
@@ -40,6 +42,9 @@ export default async function Page() {
                   <Link href={`/admin/users/${user.id}`} className="font-semibold text-slate-800">
                     {user.email}
                   </Link>
+                </td>
+                <td className="px-4 py-3">
+                  <UserRoleForm userId={user.id} initialRole={user.role} />
                 </td>
                 <td className="px-4 py-3 text-slate-600">{user.latestStatus}</td>
                 <td className="px-4 py-3 text-slate-600">{user.optedOut ? '停止中' : '有効'}</td>

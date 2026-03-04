@@ -105,7 +105,12 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
             attemptId: createdAttempt.id,
             questionId: answer.questionId,
             selectedOptionId: answer.questionType === 'single_choice' ? (answer.selectedOptionIds[0] ?? null) : null,
-            selectedOptionIds: answer.questionType === 'multiple_choice' ? (answer.selectedOptionIds ? [...answer.selectedOptionIds] : []) : [],
+            selectedOptionIds:
+              answer.questionType === 'multiple_choice'
+                ? answer.selectedOptionIds
+                  ? [...answer.selectedOptionIds]
+                  : []
+                : [],
             isCorrect: answer.isCorrect,
           })),
         });

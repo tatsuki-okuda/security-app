@@ -28,7 +28,15 @@ export const authConfig = {
         token.id = user.id;
         // The user object here comes from the DB (via PrismaAdapter),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        token.role = (user as any).role || 'user';
+        let role = (user as any).role || 'user';
+
+        // 環境変数 AUTH_ADMIN_EMAILS に設定されたメールアドレスの場合は強制的に admin ロールを付与する
+        const adminEmails = process.env.AUTH_ADMIN_EMAILS?.split(',').map((e) => e.trim()) || [];
+        if (user.email && adminEmails.includes(user.email)) {
+          role = 'admin';
+        }
+
+        token.role = role;
       }
       return token;
     },
