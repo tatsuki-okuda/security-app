@@ -19,12 +19,14 @@
 > **Podmanのインストール方法と環境構築の詳細については、[doc/infrastructure/podman.md](./doc/infrastructure/podman.md) を参照してください。**
 
 #### 前提
+
 - Podman をインストール済み（インストール方法は [doc/infrastructure/podman.md](./doc/infrastructure/podman.md) を参照）
 - `podman-compose` が使えること（`podman compose` コマンド）
 - エイリアス設定については [doc/infrastructure/podman.md](./doc/infrastructure/podman.md#エイリアス設定) を参照
 - Podman Machine が起動していること（未起動なら `podman machine start` もしくは `pmm-start`。初回は `podman machine init` を [doc/infrastructure/podman.md](./doc/infrastructure/podman.md) に従って実行）
 
 #### 起動
+
 ルートディレクトリで実行:
 
 ```
@@ -38,10 +40,12 @@ pmc-up
 ```
 
 起動後にアクセス:
+
 - Next.js: `http://localhost:3000`
 - Mailpit UI: `http://localhost:8025`（ローカル配信メールの確認）
 
 #### 停止
+
 ```
 podman compose -f root/docker-compose.yml down
 ```
@@ -57,11 +61,13 @@ pmc-down
 > **Dockerのインストール方法と環境構築の詳細については、[doc/infrastructure/docker.md](./doc/infrastructure/docker.md) を参照してください。**
 
 #### 前提
+
 - Docker Desktop または Docker Community Edition がインストール済み
 - `docker-compose` が使えること（`docker compose` コマンド）
 - Docker daemon が起動していること
 
 #### 起動
+
 ルートディレクトリで実行:
 
 ```
@@ -69,29 +75,109 @@ docker compose -f root/docker-compose.yml up --build
 ```
 
 起動後にアクセス:
+
 - Next.js: `http://localhost:3000`
 - Mailpit UI: `http://localhost:8025`（ローカル配信メールの確認）
 
 #### 停止
+
 ```
 docker compose -f root/docker-compose.yml down
 ```
 
 ### DB 情報（コンテナ内）
+
 - Host: `db`
 - Port: `5432`
 - User: `app`
 - Password: `app`
 - Database: `app`
 
-### Prisma（必要に応じて）
-初回で DB マイグレーションが必要な場合:
-```
-podman compose -f root/docker-compose.yml exec next npx prisma migrate dev --schema src/prisma/schema.prisma
-```
-（Docker の場合は `podman compose` を `docker compose` に置き換えてください。または、エイリアスを設定している場合は [doc/infrastructure/podman.md](./doc/infrastructure/podman.md#エイリアス設定) を参照）
+### Prismaに関する操作
+
+Prismaの各種操作は、Dockerコンテナ内から直接実行する方法と、ホスト側から `docker-compose` を使ってコンテナ外から実行する方法があります。
+※本プロジェクトではPodmanもサポートしているため、環境に応じて `docker compose` を `podman compose` に置き換えて実行してください。
+
+#### マイグレーションの実行
+
+スキーマの変更をデータベースに適用します。初回起動時などにご利用ください。
+
+- **コンテナ内から実行:**
+  ```bash
+  npx prisma migrate dev
+  ```
+- **コンテナ外から実行 (docker-compose):**
+  ```bash
+  docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma migrate dev"
+  ```
+
+#### マイグレーションの追加
+
+スキーマファイルを変更し、新しいマイグレーション履歴を作成して適用します。
+
+- **コンテナ内から実行:**
+  ```bash
+  npx prisma migrate dev --name <migration_name>
+  ```
+- **コンテナ外から実行 (docker-compose):**
+  ```bash
+  docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma migrate dev --name <migration_name>"
+  ```
+
+#### Prismaクライアントの作成
+
+スキーマの変更に合わせてPrismaクライアントを再生成します。
+
+- **コンテナ内から実行:**
+  ```bash
+  npx prisma generate
+  ```
+- **コンテナ外から実行 (docker-compose):**
+  ```bash
+  docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma generate"
+  ```
+
+#### Seedの挿入
+
+初期データやテストデータをデータベースに投入します。
+
+- **コンテナ内から実行:**
+  ```bash
+  npx prisma db seed
+  ```
+- **コンテナ外から実行 (docker-compose):**
+  ```bash
+  docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma db seed"
+  ```
+
+#### データベースのリセット
+
+データベースの全データを削除し、すべてのマイグレーションを再適用（およびSeedの実行）します。
+
+- **コンテナ内から実行:**
+  ```bash
+  npx prisma migrate reset
+  ```
+- **コンテナ外から実行 (docker-compose):**
+  ```bash
+  docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma migrate reset"
+  ```
+
+#### Prisma Studioの起動
+
+ブラウザ（`http://localhost:5555`）でデータベースの中身をGUIで確認・編集できるツールを起動します。
+
+- **コンテナ内から実行:**
+  ```bash
+  npx prisma studio --port 5555 --browser none
+  ```
+- **コンテナ外から実行 (docker-compose):**
+  ```bash
+  docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma studio --port 5555 --browser none"
+  ```
 
 ### ローカルメール開発（Mailpit）
+
 - 開発環境のSMTPは `mailpit:1025` に向くように `root/docker-compose.yml` で設定済み
 - `/admin/drills/create` からメール配信すると、Mailpit UI（`http://localhost:8025`）で本文とリンクを確認できる
 
