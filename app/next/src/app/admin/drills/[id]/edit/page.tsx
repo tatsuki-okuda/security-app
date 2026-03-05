@@ -1,9 +1,10 @@
 import Link from 'next/link';
 
-export default function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <main className="mx-auto mt-12 max-w-3xl space-y-4 px-4 sm:px-0">
-      <Link href={`/admin/drills/${params.id}`} className="text-sm font-semibold text-text-secondary">
+      <Link href={`/admin/drills/${id}`} className="text-sm font-semibold text-text-secondary">
         ← 詳細へ戻る
       </Link>
       <h1 className="text-2xl font-semibold text-text-primary">訓練編集</h1>

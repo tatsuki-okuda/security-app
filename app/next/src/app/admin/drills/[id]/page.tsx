@@ -5,9 +5,10 @@ import { createContainer } from '../../../../_di/container.server';
 
 import { StopDrillButton } from './_ui/StopDrillButton';
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const c = createContainer();
-  const result = await c.admin.usecases.getDrillDetail(params.id);
+  const { id } = await params;
+  const result = await c.admin.usecases.getDrillDetail(id);
 
   if (!result.ok) {
     if (result.error.type === 'NOT_FOUND') {
