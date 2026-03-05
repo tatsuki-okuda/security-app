@@ -65,6 +65,7 @@ doc/
 | ドキュメント | 説明 | 対象者 |
 |-----------|------|--------|
 | [next.md](./next.md) | Next.js / React の実装ガイドライン | 開発者 |
+| [slack.md](./slack.md) | Slack連携（通知・DM）の仕様と設計方針 | 開発者・PM |
 | [infrastructure/style.md](./infrastructure/style.md) | コーディング規約・命名指針 | 開発者 |
 
 ### テスト

@@ -100,7 +100,7 @@
 **要素**
 
 - メールアドレス入力（必須）
-- Slack ID（またはユーザー名/mentionable ID）入力（任意）
+- Slack ID（SlackのU ID `U...` を想定。ユーザー名/mentionable IDでも可）入力（任意）
   - ※訓練配信時に宛先（メールアドレス または Slack ID）が未登録のチャネルを選択された場合は、対象外（非送信）として扱う
 - 参加同意チェック（必須）
 - 登録ボタン
@@ -118,7 +118,7 @@
 - Feature: `features/enroll`
 - バリデーション: `features/enroll/validators`（zod schema）
 - UI: `features/enroll/_ui`
-- 今後の拡張：Slack配信用のチャネル/IDの正当性チェック
+- 今後の拡張：Slack配信用のチャネル/IDの正当性チェック（詳細は [Slack連携仕様](./slack.md) を参照）
 - **Adminのみ**
 
 ---
@@ -226,7 +226,7 @@
     - ❌ 失敗：不足あり → エラーメッセージ表示、Draft のまま
   - **「配信する」ボタン**（Deliverable 状態のみ有効）
     - 対象者選択：全員 / ランダム / 個別
-    - チャネル選択：メール / Slack / 両方
+    - チャネル選択：メール / Slack / 両方（Slack配信方法の詳細は [Slack連携仕様](./slack.md) を参照）
     - 送信タイミング：即時 / 指定時刻
     - 送信実行 → **Delivering へ遷移** → `/admin/drills/[id]` へリダイレクト
 
