@@ -20,6 +20,18 @@
         "typescript.enablePromptUseWorkspaceTsdk": true
       }
     },
+    {
+      "name": ".vscode",
+      "path": "../.vscode"
+    },
+    {
+      "name": ".cursor",
+      "path": "../.cursor"
+    },
+    {
+      "name": ".agents",
+      "path": "../.agents"
+    },
   ],
   "settings": {
     // グローバル設定（全フォルダに適用）
@@ -27,7 +39,9 @@
     "typescript.preferences.useAliasesForRenames": false,
     "typescript.updateImportsOnFileMove.enabled": "always",
     "cSpell.words": [
-      "usecases"
+      "usecases",
+      "usecase",
+      "Interactor"
     ]
   }
 }
