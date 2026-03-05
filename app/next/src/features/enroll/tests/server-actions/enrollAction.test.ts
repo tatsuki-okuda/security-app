@@ -27,7 +27,6 @@ describe('登録サーバーアクション', () => {
     const formData = new FormData();
     formData.set('email', '');
     formData.set('slackUserId', '');
-    formData.set('channel', 'slack');
     formData.set('consent', 'false');
 
     const result = await enrollAction({ status: 'idle' }, formData);
@@ -35,7 +34,6 @@ describe('登録サーバーアクション', () => {
     expect(result.status).toBe('error');
     if (result.status === 'error') {
       expect(result.fieldErrors?.email?.length).toBeGreaterThan(0);
-      expect(result.fieldErrors?.slackUserId?.[0]).toBe('Slack ID を入力してください');
       expect(result.fieldErrors?.consent?.[0]).toBe('訓練への参加に同意してください');
     }
   });
@@ -47,7 +45,6 @@ describe('登録サーバーアクション', () => {
     const formData = new FormData();
     formData.set('email', 'user@example.com');
     formData.set('slackUserId', 'U12345678');
-    formData.set('channel', 'both');
     formData.set('consent', 'true');
 
     await expect(enrollAction({ status: 'idle' }, formData)).rejects.toThrow('REDIRECT');

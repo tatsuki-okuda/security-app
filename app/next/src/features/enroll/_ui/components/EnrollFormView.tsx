@@ -86,16 +86,6 @@ export const EnrollFormView = ({
             />
           </div>
 
-          <div className={formStyles.field}>
-            <label htmlFor="channel" className={formStyles.label}>
-              配信チャネル
-            </label>
-            <select id="channel" {...register('channel')} className={formStyles.input}>
-              <option value="email">メール</option>
-              <option value="slack">Slack</option>
-              <option value="both">メール + Slack</option>
-            </select>
-          </div>
 
           <div className={formStyles.field}>
             <label htmlFor="consent" className={formStyles.checkboxRow}>

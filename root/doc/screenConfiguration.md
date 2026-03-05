@@ -96,13 +96,12 @@
 - `/admin/enroll`
 - 目的：
   - **訓練対象者の登録（Adminが実施）**
-  - 配信チャネル選択（メール / Slack いずれか or 両方）
 
 **要素**
 
 - メールアドレス入力（必須）
-- Slack ID（またはユーザー名/mentionable ID）入力（任意：Slack配信時は必須）
-- 配信チャネル選択（メール / Slack / 両方）
+- Slack ID（またはユーザー名/mentionable ID）入力（任意）
+  - ※訓練配信時に宛先（メールアドレス または Slack ID）が未登録のチャネルを選択された場合は、対象外（非送信）として扱う
 - 参加同意チェック（必須）
 - 登録ボタン
 - バリデーション
@@ -119,7 +118,7 @@
 - Feature: `features/enroll`
 - バリデーション: `features/enroll/validators`（zod schema）
 - UI: `features/enroll/_ui`
-- 今後の拡張：Slack配信用のチャネル/IDの正当性チェック、複数チャネル選択時の送信キュー投入
+- 今後の拡張：Slack配信用のチャネル/IDの正当性チェック
 - **Adminのみ**
 
 ---

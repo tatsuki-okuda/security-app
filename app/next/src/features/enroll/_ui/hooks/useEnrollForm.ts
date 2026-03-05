@@ -36,7 +36,6 @@ export const useEnrollForm = (action: EnrollAction) => {
   } = useForm<EnrollInput>({
     resolver: zodResolver(enrollSchema),
     mode: 'onBlur', // blur 時にバリデーション
-    defaultValues: { channel: 'email' },
   });
 
   // useActionState: Server Action 結果を管理
@@ -61,7 +60,6 @@ export const useEnrollForm = (action: EnrollAction) => {
     const formData = new FormData();
     formData.set('email', data.email);
     formData.set('slackUserId', data.slackUserId ?? '');
-    formData.set('channel', data.channel);
     formData.set('consent', data.consent ? 'true' : 'false');
     await formAction(formData);
   });
