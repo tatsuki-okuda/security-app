@@ -32,10 +32,10 @@ export function UserRoleForm({
       disabled={isDisabled}
       className={`rounded border px-2 py-1 text-sm ${
         isDisabled
-          ? 'cursor-not-allowed border-none bg-transparent font-semibold text-slate-500' // マスター管理者の場合の見た目
+          ? 'cursor-not-allowed border-none bg-transparent font-semibold text-text-secondary' // マスター管理者の場合の見た目
           : initialRole === 'admin'
             ? 'border-slate-300 bg-amber-50 text-amber-700'
-            : 'border-slate-300 bg-slate-50 text-slate-700'
+            : 'border-slate-300 bg-bg text-text-primary'
       }`}
     >
       <option value="user">User</option>

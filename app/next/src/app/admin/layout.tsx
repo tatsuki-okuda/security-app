@@ -1,13 +1,14 @@
-import { auth, signIn } from '@/auth';
+import { auth, signIn, signOut } from '@/auth';
+import { AdminLayoutShell } from '../../features/admin/_ui/components/AdminLayoutShell';
 
 export const dynamic = 'force-dynamic';
 
 const LoginModal = () => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+    <div className="w-full max-w-sm space-y-4 rounded-2xl bg-surface p-6 shadow-xl">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold text-slate-900">管理者ログインが必要です</h2>
-        <p className="text-sm text-slate-600">このページを表示するには管理者権限でのログインが必要です。</p>
+        <h2 className="text-xl font-bold text-text-primary">管理者ログインが必要です</h2>
+        <p className="text-sm text-text-secondary">このページを表示するには管理者権限でのログインが必要です。</p>
       </div>
       <div className="space-y-3 pt-4">
         <form
@@ -45,11 +46,11 @@ const LoginModal = () => (
 );
 
 const Forbidden = () => (
-  <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-    <div className="w-full max-w-lg space-y-3 rounded-2xl bg-white p-8 shadow">
-      <h2 className="text-xl font-bold text-slate-900">権限がありません</h2>
-      <p className="text-sm text-slate-600">管理者ロールでログインしてから再度アクセスしてください。</p>
-      <p className="text-xs text-slate-500">疑わしい場合は管理者に連絡してください。</p>
+  <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+    <div className="w-full max-w-lg space-y-3 rounded-2xl bg-surface p-8 shadow">
+      <h2 className="text-xl font-bold text-text-primary">権限がありません</h2>
+      <p className="text-sm text-text-secondary">管理者ロールでログインしてから再度アクセスしてください。</p>
+      <p className="text-xs text-text-secondary">疑わしい場合は管理者に連絡してください。</p>
     </div>
   </div>
 );
@@ -61,20 +62,34 @@ export default async function AdminLayout({
 }>) {
   const session = await auth();
 
-  if (process.env.AUTH_BYPASS === 'true') {
-    return <>{children}</>;
+  if (process.env.AUTH_BYPASS !== 'true') {
+    if (!session?.user) {
+      return <LoginModal />;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const role = (session.user as any).role;
+
+    if (role !== 'admin') {
+      return <Forbidden />;
+    }
   }
 
-  if (!session?.user) {
-    return <LoginModal />;
-  }
+  const logoutAction = (
+    <form
+      action={async () => {
+        'use server';
+        await signOut({ redirectTo: '/' });
+      }}
+    >
+      <button
+        type="submit"
+        className="rounded-lg border border-border bg-surface px-4 py-2 text-sm text-text-primary cursor-pointer transition-all duration-200 hover:bg-border hover:shadow-md active:translate-y-px"
+      >
+        ログアウト
+      </button>
+    </form>
+  );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const role = (session.user as any).role;
-
-  if (role !== 'admin') {
-    return <Forbidden />;
-  }
-
-  return <>{children}</>;
+  return <AdminLayoutShell logoutAction={logoutAction}>{children}</AdminLayoutShell>;
 }
