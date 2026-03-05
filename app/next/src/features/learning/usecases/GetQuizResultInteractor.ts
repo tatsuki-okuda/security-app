@@ -35,5 +35,13 @@ export const createGetQuizResultInteractor =
       return err({ type: 'REPO', message: countResult.error.message });
     }
 
-    return ok({ score: latestResult.value.score, attemptCount: countResult.value });
+    const feedback = latestResult.value.feedback as 
+      | { strengths: string[]; improvements: string[]; advice: string[]; overallFeedback: string }
+      | undefined;
+
+    return ok({ 
+      score: latestResult.value.score, 
+      attemptCount: countResult.value,
+      ...(feedback && { feedback })
+    });
   };

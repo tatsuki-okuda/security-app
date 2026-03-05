@@ -159,10 +159,16 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
           score: true,
           isPassed: true,
           submittedAt: true,
+          feedback: true,
         },
       });
 
-      return ok(attempt);
+      if (!attempt) return ok(null);
+
+      return ok({
+        ...attempt,
+        feedback: attempt.feedback as null | { strengths: string[]; improvements: string[]; advice: string[]; overallFeedback: string }
+      });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
@@ -176,6 +182,53 @@ export const createPrismaQuizRepository = (): QuizRepository => ({
         where: { drillId, userId },
       });
       return ok(count);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
+    }
+  },
+  getUserAttempts: async (drillId, userId) => {
+    try {
+      if (!userId) return ok([]);
+
+      const attempts = await prisma.quizAttempt.findMany({
+        where: { drillId, userId },
+        orderBy: { attemptNo: 'asc' },
+        select: {
+          attemptNo: true,
+          score: true,
+          isPassed: true,
+          answers: {
+            select: {
+              questionId: true,
+              isCorrect: true,
+              selectedOptionIds: true,
+            },
+          },
+        },
+      });
+
+      return ok(
+        attempts.map((attempt) => ({
+          ...attempt,
+          answers: attempt.answers.map((answer) => ({
+            ...answer,
+            selectedOptionIds: (answer.selectedOptionIds as string[] | null) ?? null,
+          })),
+        })),
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
+    }
+  },
+  updateAttemptFeedback: async (attemptId, feedback) => {
+    try {
+      await prisma.quizAttempt.update({
+        where: { id: attemptId },
+        data: { feedback },
+      });
+      return ok(undefined);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });

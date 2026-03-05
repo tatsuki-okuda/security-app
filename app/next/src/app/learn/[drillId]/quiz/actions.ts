@@ -36,5 +36,10 @@ export const submitQuizAction = async (_prev: QuizActionState, formData: FormDat
     redirect(`/learn/${drillId}/complete?token=${encodeURIComponent(token)}`);
   }
 
-  return { status: 'failed', score: result.value.score, explanations: result.value.explanations };
+  return { 
+    status: 'failed', 
+    score: result.value.score, 
+    explanations: result.value.explanations, 
+    feedback: result.value.feedback 
+  };
 };

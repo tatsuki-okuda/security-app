@@ -22,6 +22,7 @@ export type QuizAttemptData = {
   score: number;
   isPassed: boolean;
   submittedAt: Date | null;
+  feedback?: null | { strengths: string[]; improvements: string[]; advice: string[]; overallFeedback: string };
 };
 
 export type QuizRecipient = {
@@ -57,4 +58,21 @@ export type QuizRepository = {
   }) => Promise<Result<void, QuizRepoError>>;
   getLatestPassedAttempt: (drillId: string, userId: string) => Promise<Result<QuizAttemptData | null, QuizRepoError>>;
   getAttemptCount: (drillId: string, userId: string) => Promise<Result<number, QuizRepoError>>;
+  
+  getUserAttempts: (drillId: string, userId: string) => Promise<
+    Result<
+      {
+        attemptNo: number;
+        score: number;
+        isPassed: boolean;
+        answers: { questionId: string; isCorrect: boolean; selectedOptionIds: string[] | null }[];
+      }[],
+      QuizRepoError
+    >
+  >;
+
+  updateAttemptFeedback: (
+    attemptId: string,
+    feedback: { strengths: string[]; improvements: string[]; advice: string[]; overallFeedback: string },
+  ) => Promise<Result<void, QuizRepoError>>;
 };

@@ -43,6 +43,7 @@ pmc-up
 
 - Next.js: `http://localhost:3000`
 - Mailpit UI: `http://localhost:8025`（ローカル配信メールの確認）
+- Ollama API (Next.js バックエンド用): `http://localhost:11434`
 
 #### 停止
 
@@ -78,6 +79,7 @@ docker compose -f root/docker-compose.yml up --build
 
 - Next.js: `http://localhost:3000`
 - Mailpit UI: `http://localhost:8025`（ローカル配信メールの確認）
+- Ollama API (Next.js バックエンド用): `http://localhost:11434`
 
 #### 停止
 
@@ -136,6 +138,17 @@ Prismaの各種操作は、Dockerコンテナ内から直接実行する方法�
   ```bash
   docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma generate"
   ```
+
+#### セキュリティクイズとフィードバック分析 (Ollama)
+
+このプロジェクトでは、AIクイズシナリオ生成およびユーザー回答のAIフィードバック分析に **Ollama** をローカルLLMとして使用しています。
+
+- **コンテナ内から実行:**
+  ```bash
+  # モデル（例: llama3）のPullが必要な場合
+  npx podman exec -it <ollamaコンテナ名> ollama pull llama3
+  ```
+- オフライン動作やOllamaの詳細な検証環境構築手順については [doc/infrastructure/ollama.md](./doc/infrastructure/ollama.md) を参照。
 
 #### Seedの挿入
 

@@ -1,13 +1,14 @@
 import { err, ok } from '../../../shared/fp/result';
+import { LlmGateway } from '../../llm/usecases/gateway/LlmGateway';
 import { scoreQuiz } from '../domain/quizScoring';
 
 import { QuizRepository } from './gateway/QuizRepository';
 import { SubmitQuizUseCase } from './SubmitQuizUseCase';
 
-export type SubmitQuizDeps = { repo: QuizRepository };
+export type SubmitQuizDeps = { repo: QuizRepository; llmGateway: LlmGateway };
 
 export const createSubmitQuizInteractor =
-  ({ repo }: SubmitQuizDeps): SubmitQuizUseCase =>
+  ({ repo, llmGateway }: SubmitQuizDeps): SubmitQuizUseCase =>
   async (input) => {
     const token = input.token.trim();
     if (!token) {
@@ -97,9 +98,41 @@ export const createSubmitQuizInteractor =
     }
 
     const explanations: Record<string, string> = {};
-    quizResult.value.forEach((q) => {
+    const quizContextForLlm = quizResult.value.map((q) => {
       explanations[q.id] = q.explanation;
+      return {
+        order: q.order,
+        questionType: q.questionType,
+        questionText: q.questionText,
+        explanation: q.explanation,
+        options: q.options,
+      };
     });
 
-    return ok({ score: scoring.score, passed, explanations });
+    // 履歴を取得してLLMでフィードバック生成
+    const historyResult = await repo.getUserAttempts(input.drillId, recipientResult.value.userId);
+    let generatedFeedback: undefined | { strengths: string[]; improvements: string[]; advice: string[]; overallFeedback: string };
+    
+    if (historyResult.ok && historyResult.value.length > 0) {
+      const mappedHistory = historyResult.value.map(h => ({
+        attemptNo: h.attemptNo,
+        score: h.score,
+        passed: h.isPassed,
+        answers: h.answers
+      }));
+
+      const feedbackResult = await llmGateway.generateQuizFeedback({
+        history: mappedHistory,
+        quizContext: quizContextForLlm,
+      });
+
+      if (feedbackResult.ok) {
+        generatedFeedback = feedbackResult.value;
+        // DBに保存する（失敗してもクイズ結果自体は返す）
+        await repo.updateAttemptFeedback(createResult.value.id, feedbackResult.value);
+      } else {
+      }
+    }
+
+    return ok({ score: scoring.score, passed, explanations, feedback: generatedFeedback });
   };

@@ -114,4 +114,56 @@ ctaText: パスワード再設定ページへ
       return err({ type: 'LLM_ERROR', message: '不明なAI生成エラーが発生しました' });
     }
   },
+
+  generateQuizFeedback: async ({ history, quizContext }) => {
+    try {
+      const llm = new ChatOpenAI({
+        modelName: process.env.LLM_MODEL || 'gpt-4o-mini',
+        temperature: 0.7,
+        configuration: {
+          baseURL: process.env.LLM_BASE_URL,
+        },
+      });
+
+      const outputSchema = z.object({
+        strengths: z.array(z.string()).describe('受講者のよくできている点や強み。最低1つ。'),
+        improvements: z.array(z.string()).describe('間違えた問題や、知識が足りないと思われる改善点。最低1つ。'),
+        advice: z.array(z.string()).describe('次に学習すべきことや、日常業務で気をつけるべき具体的なアドバイス。最低1つ。'),
+        overallFeedback: z.string().describe('受講者全体へ向けた総評テキスト（3〜5文程度）。'),
+      });
+
+      const parser = StructuredOutputParser.fromZodSchema(outputSchema);
+
+      const prompt = PromptTemplate.fromTemplate(`
+あなたは企業の社内セキュリティ教育を担当するプロのアナリストです。
+受講者が提出したクイズの結果と過去の受験履歴を分析し、より深い学習を促すためのフィードバックを生成してください。
+
+以下の情報を元に、受講者の【強み】、【改善点】、【アドバイス】、【総評】をJSONで生成してください。
+不合格を繰り返している人には弱点の克服方法を、合格した人にはさらに実践的な知識をアドバイスしてください。
+
+【クイズ出題情報】
+{quizContext}
+
+【受講履歴（全試行回）】
+{history}
+
+{format_instructions}
+      `);
+
+      const chain = RunnableSequence.from([prompt, llm, parser]);
+
+      const response = await chain.invoke({
+        quizContext: JSON.stringify(quizContext, null, 2),
+        history: JSON.stringify(history, null, 2),
+        format_instructions: parser.getFormatInstructions(),
+      });
+
+      return ok(response);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return err({ type: 'LLM_ERROR', message: `フィードバック生成エラー: ${e.message}` });
+      }
+      return err({ type: 'LLM_ERROR', message: '不明なフィードバック生成エラーが発生しました' });
+    }
+  },
 });

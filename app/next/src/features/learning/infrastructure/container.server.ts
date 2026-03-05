@@ -1,3 +1,4 @@
+import { createLangchainLlmGateway } from '../../llm/infrastructure/langchain/LangchainLlmGateway';
 import { createGetLearningIntroInteractor } from '../usecases/GetLearningIntroInteractor';
 import { createGetQuizInteractor } from '../usecases/GetQuizInteractor';
 import { createGetQuizResultInteractor } from '../usecases/GetQuizResultInteractor';
@@ -10,12 +11,14 @@ import { createPrismaQuizRepository } from './prisma/PrismaQuizRepository';
 export const createLearningContainer = () => {
   const repo = createPrismaLearningRepository();
   const quizRepo = createPrismaQuizRepository();
+  const llmGateway = createLangchainLlmGateway();
+  
   return {
     usecases: {
       getIntro: createGetLearningIntroInteractor({ repo }),
       recordLearning: createRecordLearningInteractor({ repo }),
       getQuiz: createGetQuizInteractor({ repo: quizRepo }),
-      submitQuiz: createSubmitQuizInteractor({ repo: quizRepo }),
+      submitQuiz: createSubmitQuizInteractor({ repo: quizRepo, llmGateway }),
       getQuizResult: createGetQuizResultInteractor({ repo: quizRepo }),
     },
   };

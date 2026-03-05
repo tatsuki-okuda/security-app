@@ -18,4 +18,24 @@ export type LlmGateway = {
       LlmGatewayError
     >
   >;
+  
+  generateQuizFeedback: (input: {
+    history: {
+      attemptNo: number;
+      score: number;
+      passed: boolean;
+      answers: { questionId: string; isCorrect: boolean; selectedOptionIds: string[] | null }[];
+    }[];
+    quizContext: Pick<QuizTemplateQuestion, 'order' | 'questionType' | 'questionText' | 'explanation' | 'options'>[];
+  }) => Promise<
+    Result<
+      {
+        strengths: string[];
+        improvements: string[];
+        advice: string[];
+        overallFeedback: string;
+      },
+      LlmGatewayError
+    >
+  >;
 };
