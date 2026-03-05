@@ -3,6 +3,12 @@ import { Result } from '../../../shared/fp/result';
 export type QuizResultOutput = {
   score: number;
   attemptCount: number;
+  feedback?: {
+    strengths: string[];
+    improvements: string[];
+    advice: string[];
+    overallFeedback: string;
+  };
 };
 
 export type GetQuizResultError =

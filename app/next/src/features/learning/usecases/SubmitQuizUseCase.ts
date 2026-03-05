@@ -15,6 +15,12 @@ export type SubmitQuizOutput = {
   score: number;
   passed: boolean;
   explanations: Record<string, string>;
+  feedback?: {
+    strengths: string[];
+    improvements: string[];
+    advice: string[];
+    overallFeedback: string;
+  };
 };
 
 export type SubmitQuizUseCase = (input: QuizSubmission) => Promise<Result<SubmitQuizOutput, SubmitQuizError>>;

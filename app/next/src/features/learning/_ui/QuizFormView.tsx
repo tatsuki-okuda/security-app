@@ -64,8 +64,52 @@ export const QuizFormView = ({ questions, action, state, token, drillId, isPendi
       ) : null}
 
       {failedScore !== null ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-          現在のスコアは {failedScore} 点です。80 点以上で合格です。
+        <div className="space-y-4">
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-800 shadow-sm">
+            <h3 className="mb-1 text-base font-bold">不合格です (スコア: {failedScore}点)</h3>
+            <p className="text-sm">80点以上で合格となります。以下のフィードバックを参考に、再度挑戦してください。</p>
+          </div>
+
+          {state.status === 'failed' && state.feedback ? (
+            <div className="space-y-4 rounded-2xl border border-indigo-100 bg-white/60 p-5 shadow-sm">
+              <h3 className="flex items-center gap-2 text-base font-bold text-indigo-900">
+                <span className="text-xl">💡</span> AI 学習フィードバック
+              </h3>
+
+              {state.feedback.strengths.length > 0 && (
+                <div className="space-y-2 rounded-xl bg-teal-50 px-4 py-3 text-sm text-teal-900">
+                  <p className="font-semibold text-teal-700">✅ よくできている点</p>
+                  <ul className="list-inside list-disc space-y-1">
+                    {state.feedback.strengths.map((str, i) => (
+                      <li key={i}>{str}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {state.feedback.improvements.length > 0 && (
+                <div className="space-y-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  <p className="font-semibold text-amber-700">🎯 改善のポイント</p>
+                  <ul className="list-inside list-disc space-y-1">
+                    {state.feedback.improvements.map((imp, i) => (
+                      <li key={i}>{imp}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {state.feedback.advice.length > 0 && (
+                <div className="space-y-2 rounded-xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+                  <p className="font-semibold text-indigo-700">📚 次の学習へのアドバイス</p>
+                  <ul className="list-inside list-disc space-y-1">
+                    {state.feedback.advice.map((adv, i) => (
+                      <li key={i}>{adv}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : null}
         </div>
       ) : null}
 

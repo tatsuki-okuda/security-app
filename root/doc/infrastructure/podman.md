@@ -139,9 +139,12 @@ pmc build --no-cache
 
 最新イメージを取り込みたい場合は `--pull` を追加してください。
 
-## ローカルメール確認（Mailpit）
+## その他のローカルサービス（Mailpit / Ollama）
 
-`root/docker-compose.yml` には Mailpit サービスが含まれており、開発中の訓練メールをローカルで確認できます。
+`root/docker-compose.yml` には他の有用なローカルサービスが含まれています。
+
+### ローカルメール確認（Mailpit）
+開発中の訓練メールをローカルで確認できます。
 
 - SMTP Host: `mailpit`
 - SMTP Port: `1025`
@@ -152,6 +155,12 @@ pmc build --no-cache
 1. 通常どおり `pmc-up`（または `podman compose -f root/docker-compose.yml up --build`）で起動
 2. 管理画面で訓練メールを配信（`/admin/drills/create`）
 3. Mailpit UI（`http://localhost:8025`）で受信メールを開き、`/t/[token]` リンク遷移を確認
+
+### ローカルLLM（Ollama）
+訓練コンテンツのAIによる生成とフィードバック分析をローカル環境で無料で行うため、Ollama のサービスが稼働します。
+
+- API Endpoint: `http://localhost:11434`
+- コンテナとして提供されるため、追加の設定なくNext.jsアプリケーションと連携します。詳細は [ollama.md](./ollama.md) を参照してください。
 
 ## 動作確認
 

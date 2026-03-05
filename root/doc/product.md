@@ -58,7 +58,7 @@ BullMQ + Redis（ランダム送信に必須）
 LangChain + Ollama（ローカルLLMモデル）
 
 - **Ollama**を使用してローカルでLLMを実行（無料・オープンソース）
-- 推奨モデル：llama3、qwen2.5（日本語対応）、mistral など
+- 推奨モデル：qwen2.5（日本語対応で最も推奨）、llama3.1、phi3 など
 - データが外部に出ないため、社内セキュリティ訓練に適している
 - LangChainの `@langchain/ollama` パッケージで統合
 - "危険な方向に寄らない制約" をプロンプトに組み込む
