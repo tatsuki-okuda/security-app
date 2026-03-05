@@ -20,7 +20,8 @@ export const createCreateDrillInteractor =
       subject: input.subject,
       body: input.body,
       guidanceText: input.guidanceText,
-      quiz: defaultQuizTemplate,
+      status: input.status,
+      quiz: input.quiz ?? defaultQuizTemplate,
     });
 
     if (!result.ok) {

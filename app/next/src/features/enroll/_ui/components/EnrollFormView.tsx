@@ -86,7 +86,6 @@ export const EnrollFormView = ({
             />
           </div>
 
-
           <div className={formStyles.field}>
             <label htmlFor="consent" className={formStyles.checkboxRow}>
               <input

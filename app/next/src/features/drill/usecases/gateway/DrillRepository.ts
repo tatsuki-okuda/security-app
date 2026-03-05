@@ -26,6 +26,7 @@ export type DrillRepository = {
     subject: string;
     body: string;
     guidanceText: string;
+    status: 'draft' | 'deliverable' | 'delivering' | 'stopped';
     quiz: QuizTemplateQuestion[];
   }) => Promise<Result<{ drillId: string }, DrillRepoError>>;
   listDeliveryTargets: () => Promise<Result<DeliveryTarget[], DrillRepoError>>;
@@ -43,7 +44,7 @@ export type DrillRepository = {
   }) => Promise<Result<void, DrillRepoError>>;
   updateDrillStatus: (input: {
     drillId: string;
-    status: 'deliverable' | 'delivering' | 'sent' | 'failed';
+    status: 'deliverable' | 'delivering' | 'sent' | 'failed' | 'stopped';
   }) => Promise<Result<void, DrillRepoError>>;
   recordSendInteraction: (input: { drillId: string; userId: string }) => Promise<Result<void, DrillRepoError>>;
 };

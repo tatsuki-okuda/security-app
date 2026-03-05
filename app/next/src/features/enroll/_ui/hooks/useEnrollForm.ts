@@ -58,8 +58,10 @@ export const useEnrollForm = (action: EnrollAction) => {
   // フォーム送信: FormData を生成して Server Action に渡す
   const handleSubmit = handleFormSubmit(async (data: EnrollInput) => {
     const formData = new FormData();
-    formData.set('email', data.email);
-    formData.set('slackUserId', data.slackUserId ?? '');
+    formData.set('email', String(data.email ?? ''));
+    if (data.slackUserId) {
+      formData.set('slackUserId', String(data.slackUserId));
+    }
     formData.set('consent', data.consent ? 'true' : 'false');
     await formAction(formData);
   });

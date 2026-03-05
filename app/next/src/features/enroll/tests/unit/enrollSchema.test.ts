@@ -24,5 +24,4 @@ describe('登録バリデーション', () => {
       expect(result.error.flatten().fieldErrors.consent?.[0]).toBe('訓練への参加に同意してください');
     }
   });
-
 });

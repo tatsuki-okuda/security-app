@@ -1,4 +1,5 @@
 import { Result } from '../../../shared/fp/result';
+import { QuizTemplateQuestion } from '../domain/quizTemplates';
 
 import { CreateDrillOutput } from './dto/CreateDrillOutput';
 
@@ -9,8 +10,10 @@ export type CreateDrillError =
 export type CreateDrillUseCase = (input: {
   title: string;
   scenarioType: string;
-  channel: 'email' | 'slack' | 'both';
+  channel: string;
   subject: string;
   body: string;
   guidanceText: string;
+  quiz?: QuizTemplateQuestion[];
+  status: 'draft' | 'deliverable' | 'delivering';
 }) => Promise<Result<CreateDrillOutput, CreateDrillError>>;

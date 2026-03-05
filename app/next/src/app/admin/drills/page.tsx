@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { createContainer } from '../../../_di/container.server';
+import { scenarios } from '../../../features/drill/domain/scenarios';
 
 export default async function Page() {
   const c = createContainer();
@@ -29,6 +30,7 @@ export default async function Page() {
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
               <th className="px-4 py-3">訓練名</th>
+              <th className="px-4 py-3">シナリオ</th>
               <th className="px-4 py-3">状態</th>
               <th className="px-4 py-3">チャネル</th>
               <th className="px-4 py-3">送信日</th>
@@ -45,8 +47,28 @@ export default async function Page() {
                     {drill.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-slate-600">{drill.status}</td>
-                <td className="px-4 py-3 text-slate-600">{drill.channel}</td>
+                <td className="px-4 py-3 text-slate-600">
+                  {scenarios.find((s) => s.value === drill.scenarioId)?.label ?? drill.scenarioId}
+                </td>
+                <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                  {drill.status === 'draft' && '下書き'}
+                  {drill.status === 'deliverable' && '配信可能'}
+                  {drill.status === 'delivering' && '配信中'}
+                  {drill.status === 'sent' && '送信済'}
+                  {drill.status === 'failed' && '失敗'}
+                  {drill.status === 'stopped' && '配信停止'}
+                  {!['draft', 'deliverable', 'delivering', 'sent', 'failed', 'stopped'].includes(drill.status) &&
+                    drill.status}
+                </td>
+                <td className="px-4 py-3 text-slate-600">
+                  {drill.channel === 'email'
+                    ? 'メール'
+                    : drill.channel === 'slack'
+                      ? 'Slack'
+                      : drill.channel === 'both'
+                        ? '両方'
+                        : drill.channel}
+                </td>
                 <td className="px-4 py-3 text-slate-600">
                   {drill.sentAt ? new Date(drill.sentAt).toLocaleString() : '-'}
                 </td>

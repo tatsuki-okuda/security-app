@@ -18,6 +18,7 @@ export const createDrillAction = async (
     subject: String(formData.get('subject') ?? ''),
     body: String(formData.get('body') ?? ''),
     guidanceText: String(formData.get('guidanceText') ?? ''),
+    actionType: String(formData.get('actionType') ?? ''),
   };
 
   const parsed = createDrillSchema.safeParse(raw);
@@ -27,7 +28,11 @@ export const createDrillAction = async (
   }
 
   const c = createContainer();
-  const created = await c.drill.usecases.create(parsed.data);
+  const created = await c.drill.usecases.create({
+    ...parsed.data,
+    quiz: parsed.data.quizQuestions ? JSON.parse(parsed.data.quizQuestions) : undefined,
+    status: parsed.data.actionType,
+  });
 
   if (!created.ok) {
     if (created.error.type === 'VALIDATION') {
@@ -36,18 +41,21 @@ export const createDrillAction = async (
     return { status: 'error', formError: created.error.message };
   }
 
-  const baseUrl = process.env.APP_BASE_URL ?? 'http://localhost:3000';
-  const sendResult = await c.drill.usecases.send({
-    drillId: created.value.drillId,
-    channel: parsed.data.channel,
-    subject: parsed.data.subject,
-    body: parsed.data.body,
-    guidanceText: parsed.data.guidanceText,
-    baseUrl,
-  });
+  // 即時配信が選ばれた場合のみ配信処理を実行
+  if (parsed.data.actionType === 'delivering') {
+    const baseUrl = process.env.APP_BASE_URL ?? 'http://localhost:3000';
+    const sendResult = await c.drill.usecases.send({
+      drillId: created.value.drillId,
+      channel: parsed.data.channel,
+      subject: parsed.data.subject,
+      body: parsed.data.body,
+      guidanceText: parsed.data.guidanceText,
+      baseUrl,
+    });
 
-  if (!sendResult.ok) {
-    return { status: 'error', formError: sendResult.error.message };
+    if (!sendResult.ok) {
+      return { status: 'error', formError: sendResult.error.message };
+    }
   }
 
   redirect(`/admin/drills/${created.value.drillId}`);
