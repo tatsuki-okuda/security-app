@@ -1,11 +1,10 @@
 ---
-description: 
-alwaysApply: true
+description: ドキュメント修正時の矛盾・更新漏れを防ぐための基本ルール
 ---
 
 # Docs Consistency Guard
 
-目的: ドキュメント修正時の矛盾・更新漏れを防ぎ、カーソル/LLMが常に最新の情報を参照できるようにする。
+目的: ドキュメント修正時の矛盾・更新漏れを防ぎ、AIエージェントが常に最新の情報を参照できるようにする。
 
 ## 正とするドキュメント
 - 画面仕様/遷移: `root/doc/screenConfiguration.md`（最新版。`root/doc/tmp.md`はドラフト）

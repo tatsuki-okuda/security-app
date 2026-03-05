@@ -1,7 +1,5 @@
 ---
-description: 
-globs: "{app/**, src/**, root/doc/**/*.md}"
-alwaysApply: false
+description: ソースコード生成・改修時に仕様ドキュメントを参照し、矛盾や更新漏れを防ぐためのルール
 ---
 
 # Code ↔ Docs Consistency Rule
