@@ -64,6 +64,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
         select: {
           id: true,
           email: true,
+          name: true,
           role: true,
           slackUserId: true,
           optedOut: true,
@@ -109,6 +110,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
       return ok({
         id: user.id,
         email: user.email,
+        name: user.name,
         role: user.role,
         slackUserId: user.slackUserId,
         optedOut: user.optedOut,

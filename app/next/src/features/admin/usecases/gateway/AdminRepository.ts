@@ -11,6 +11,7 @@ export type UserListItem = {
 export type UserDetail = {
   id: string;
   email: string;
+  name: string | null;
   role: string;
   slackUserId: string | null;
   optedOut: boolean;

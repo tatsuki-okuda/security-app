@@ -7,10 +7,10 @@ import { UserRepository } from '../../usecases/gateway/UserRepository';
 // ここでは簡易的に import できる想定にしてる。
 
 export const createPrismaUserRepository = (): UserRepository => ({
-  enroll: async ({ email, consentedAt, slackUserId }) => {
+  enroll: async ({ email, name, consentedAt, slackUserId }) => {
     try {
       const user = await prisma.user.create({
-        data: { email: email.value, consentedAt, slackUserId: slackUserId || null },
+        data: { email: email.value, name: name || null, consentedAt, slackUserId: slackUserId || null },
         select: { id: true },
       });
       return ok({ userId: user.id });

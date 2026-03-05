@@ -81,6 +81,7 @@ erDiagram
 | --- | --- | --- | --- |
 | id | uuid | PK | ログイン・紐付け用 |
 | email | varchar | unique, not null | メール配信の宛先兼ログイン識別 |
+| name | varchar | nullable | ユーザー名 |
 | consented_at | timestamptz | nullable | 訓練参加への同意取得日時 |
 | slack_user_id | varchar | unique, nullable | Slack 配信の宛先 |
 | role | enum(admin,user) | @default("user") | 管理権限判定用 |

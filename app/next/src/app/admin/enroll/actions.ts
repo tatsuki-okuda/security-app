@@ -34,6 +34,7 @@ import type { EnrollActionState } from '../../../features/enroll/contracts/enrol
 export const enrollAction = async (_prev: EnrollActionState, formData: FormData): Promise<EnrollActionState> => {
   const raw = {
     email: String(formData.get('email') ?? ''),
+    name: String(formData.get('name') ?? ''),
     slackUserId: String(formData.get('slackUserId') ?? ''),
     consent: formData.get('consent') === 'true',
   };
@@ -42,14 +43,18 @@ export const enrollAction = async (_prev: EnrollActionState, formData: FormData)
   const parsed = enrollSchema.safeParse(raw);
   if (!parsed.success) {
     const fe = parsed.error.flatten().fieldErrors;
-    return { status: 'error', fieldErrors: { email: fe.email, consent: fe.consent, slackUserId: fe.slackUserId } };
+    return {
+      status: 'error',
+      fieldErrors: { email: fe.email, name: fe.name, consent: fe.consent, slackUserId: fe.slackUserId },
+    };
   }
 
   // 2. usecase / domain でビジネスロジック検証
   const c = createContainer();
-  const inputData = parsed.data as { email: string; slackUserId?: string; consent: boolean };
+  const inputData = parsed.data as { email: string; name?: string; slackUserId?: string; consent: boolean };
   const r = await c.enroll.usecases.enroll({
     email: inputData.email,
+    name: inputData.name,
     slackUserId: inputData.slackUserId,
     consent: inputData.consent,
   });
@@ -58,6 +63,9 @@ export const enrollAction = async (_prev: EnrollActionState, formData: FormData)
     if (r.error.type === 'VALIDATION') {
       if (r.error.field === 'email') {
         return { status: 'error', fieldErrors: { email: [r.error.message] } };
+      }
+      if (r.error.field === 'name') {
+        return { status: 'error', fieldErrors: { name: [r.error.message] } };
       }
       if (r.error.field === 'slackUserId') {
         return { status: 'error', fieldErrors: { slackUserId: [r.error.message] } };

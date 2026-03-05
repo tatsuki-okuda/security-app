@@ -10,6 +10,7 @@ export type EnrollRepoError =
 export type UserRepository = {
   enroll: (input: {
     email: Email;
+    name?: string;
     consentedAt: Date;
     slackUserId?: string;
   }) => Promise<Result<EnrollUserOutput, EnrollRepoError>>;

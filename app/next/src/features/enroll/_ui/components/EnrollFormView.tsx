@@ -9,6 +9,7 @@ type Props = {
   register: UseFormRegister<EnrollInput>;
   onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
   emailErrors: string[];
+  nameErrors: string[];
   consentErrors: string[];
   slackErrors: string[];
   formError?: string;
@@ -19,12 +20,14 @@ export const EnrollFormView = ({
   register,
   onSubmit,
   emailErrors,
+  nameErrors,
   consentErrors,
   slackErrors,
   formError,
   submitButton,
 }: Props) => {
   const hasEmailError = emailErrors.length > 0;
+  const hasNameError = nameErrors.length > 0;
   const hasConsentError = consentErrors.length > 0;
   const hasSlackError = slackErrors.length > 0;
 
@@ -65,6 +68,28 @@ export const EnrollFormView = ({
           </div>
 
           <div className={formStyles.field}>
+            <label htmlFor="name" className={formStyles.label}>
+              ユーザー名（任意）
+            </label>
+            <input
+              id="name"
+              {...register('name')}
+              className={`${formStyles.input} ${hasNameError ? formStyles.inputError : ''}`}
+              aria-invalid={hasNameError}
+              aria-describedby={hasNameError ? 'name-errors' : undefined}
+            />
+            <p className={formStyles.hint}>参加者の名前を入力してください。</p>
+
+            <InlineError
+              id="name-errors"
+              messages={nameErrors}
+              className={formStyles.errors.list}
+              itemClassName={formStyles.errors.item}
+              bulletClassName={formStyles.errors.bullet}
+            />
+          </div>
+
+          <div className={formStyles.field}>
             <label htmlFor="slackUserId" className={formStyles.label}>
               Slack ID
             </label>
@@ -86,26 +111,17 @@ export const EnrollFormView = ({
             />
           </div>
 
-          <div className={formStyles.field}>
-            <label htmlFor="consent" className={formStyles.checkboxRow}>
-              <input
-                id="consent"
-                type="checkbox"
-                {...register('consent')}
-                className={formStyles.checkbox}
-                aria-invalid={hasConsentError}
-                aria-describedby={hasConsentError ? 'consent-errors' : undefined}
+          {hasConsentError && (
+            <div className={formStyles.field}>
+              <InlineError
+                id="consent-errors"
+                messages={consentErrors}
+                className={formStyles.errors.list}
+                itemClassName={formStyles.errors.item}
+                bulletClassName={formStyles.errors.bullet}
               />
-              <span className={formStyles.checkboxLabel}>訓練の目的と内容を理解し、参加に同意します。</span>
-            </label>
-            <InlineError
-              id="consent-errors"
-              messages={consentErrors}
-              className={formStyles.errors.list}
-              itemClassName={formStyles.errors.item}
-              bulletClassName={formStyles.errors.bullet}
-            />
-          </div>
+            </div>
+          )}
 
           {formError && (
             <div className={formStyles.alert} role="alert" aria-live="polite">
