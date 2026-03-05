@@ -35,5 +35,5 @@
   "eslint.useFlatConfig": true,
   "files.eol": "\n",
   "prettier.requireConfig": true,
-  "cSpell.words": ["usecases", "usecase"]
+  "cSpell.words": ["usecases", "usecase", "Interactor"]
 }
