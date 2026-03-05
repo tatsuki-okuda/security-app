@@ -6,14 +6,14 @@ import { err, ok } from '../../../../shared/fp/result';
 import { DrillRepository } from '../../usecases/gateway/DrillRepository';
 
 export const createPrismaDrillRepository = (): DrillRepository => ({
-  createDrillWithQuiz: async ({ title, scenarioType, channel, subject, body, guidanceText, quiz }) => {
+  createDrillWithQuiz: async ({ title, scenarioType, channel, subject, body, guidanceText, status, quiz }) => {
     try {
       const drill = await prisma.$transaction(async (tx) => {
         const created = await tx.drill.create({
           data: {
             title,
             scenarioId: scenarioType,
-            status: 'deliverable',
+            status,
             channel,
             subject,
             body,

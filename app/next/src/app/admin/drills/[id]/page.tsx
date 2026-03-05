@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 
 import { createContainer } from '../../../../_di/container.server';
 
+import { StopDrillButton } from './_ui/StopDrillButton';
+
 export default async function Page({ params }: { params: { id: string } }) {
   const c = createContainer();
   const result = await c.admin.usecases.getDrillDetail(params.id);
@@ -24,15 +26,49 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   return (
     <main className="mx-auto mt-12 max-w-5xl space-y-6 px-4 sm:px-0">
-      <header className="space-y-2">
-        <Link href="/admin/drills" className="text-sm font-semibold text-slate-500">
-          ← 一覧へ戻る
-        </Link>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-slate-900">訓練詳細</h1>
-          <Link href={`/admin/drills/${drill.id}/edit`} className="text-sm font-semibold text-slate-600">
-            編集する
+      <header className="space-y-4">
+        <div>
+          <Link href="/admin/drills" className="text-sm font-semibold text-slate-500 hover:text-slate-700 transition">
+            ← 一覧へ戻る
           </Link>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold text-slate-900">訓練詳細</h1>
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                drill.status === 'delivering'
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : drill.status === 'stopped'
+                    ? 'bg-slate-100 text-slate-700'
+                    : drill.status === 'deliverable'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {drill.status === 'delivering'
+                ? '配信中'
+                : drill.status === 'stopped'
+                  ? '配信停止'
+                  : drill.status === 'deliverable'
+                    ? '配信可能'
+                    : '下書き'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {drill.status === 'delivering' && <StopDrillButton drillId={drill.id} />}
+
+            {drill.status !== 'stopped' && (
+              <Link
+                href={`/admin/drills/${drill.id}/edit`}
+                className="inline-flex items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-slate-50"
+              >
+                編集する
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 

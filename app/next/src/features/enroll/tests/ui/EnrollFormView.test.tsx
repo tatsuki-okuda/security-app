@@ -10,7 +10,7 @@ describe('登録フォーム表示', () => {
   it('メールと同意のエラーを表示する', () => {
     render(
       <EnrollFormView
-        register={(name) => ({ name, onChange: () => {}, onBlur: () => {}, ref: () => {} })}
+        register={(name) => ({ name, onChange: async () => {}, onBlur: async () => {}, ref: () => {} })}
         onSubmit={noop}
         emailErrors={['メールアドレスを入力してください']}
         slackErrors={['Slack ID を入力してください']}

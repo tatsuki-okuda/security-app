@@ -28,6 +28,7 @@ export type UserDetail = {
 export type DrillListItem = {
   id: string;
   title: string;
+  scenarioId: string | null;
   status: string;
   channel: string;
   sentAt: Date | null;

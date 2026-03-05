@@ -69,5 +69,4 @@ describe('登録ユースケース', () => {
     const args = (repo.enroll as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(args.consentedAt).toBeInstanceOf(Date);
   });
-
 });

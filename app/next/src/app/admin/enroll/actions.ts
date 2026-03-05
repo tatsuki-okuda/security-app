@@ -35,7 +35,6 @@ export const enrollAction = async (_prev: EnrollActionState, formData: FormData)
   const raw = {
     email: String(formData.get('email') ?? ''),
     slackUserId: String(formData.get('slackUserId') ?? ''),
-    channel: String(formData.get('channel') ?? 'email'),
     consent: formData.get('consent') === 'true',
   };
 
@@ -48,7 +47,12 @@ export const enrollAction = async (_prev: EnrollActionState, formData: FormData)
 
   // 2. usecase / domain でビジネスロジック検証
   const c = createContainer();
-  const r = await c.enroll.usecases.enroll(parsed.data);
+  const inputData = parsed.data as { email: string; slackUserId?: string; consent: boolean };
+  const r = await c.enroll.usecases.enroll({
+    email: inputData.email,
+    slackUserId: inputData.slackUserId,
+    consent: inputData.consent,
+  });
 
   if (!r.ok) {
     if (r.error.type === 'VALIDATION') {
