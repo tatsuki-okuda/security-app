@@ -1,7 +1,7 @@
 'use client';
 
 import { Bot, Loader2 } from 'lucide-react';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, startTransition } from 'react';
 
 import type { QuizTemplateQuestion } from '../../drill/domain/quizTemplates';
 import type { GenerateContentActionState } from '../contracts/generate';
@@ -33,11 +33,21 @@ export const AiGenerateButton = ({ action, scenarioType, onGenerated }: Props) =
 
   const disabled = isPending || !scenarioType;
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (disabled) return;
+    startTransition(() => {
+      const formData = new FormData();
+      formData.set('scenarioType', scenarioType);
+      formAction(formData);
+    });
+  };
+
   return (
-    <form action={formAction} className="inline-block">
-      <input type="hidden" name="scenarioType" value={scenarioType} />
+    <div className="inline-block">
       <button
-        type="submit"
+        type="button"
+        onClick={handleClick}
         disabled={disabled}
         className="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50"
       >
@@ -47,6 +57,6 @@ export const AiGenerateButton = ({ action, scenarioType, onGenerated }: Props) =
       {state.status === 'error' && state.formError && (
         <span className="ml-2 text-xs text-error">{state.formError}</span>
       )}
-    </form>
+    </div>
   );
 };
