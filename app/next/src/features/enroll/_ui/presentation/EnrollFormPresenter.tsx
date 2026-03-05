@@ -12,14 +12,23 @@ type Props = {
 };
 
 export const EnrollForm = ({ action }: Props) => {
-  const { register, handleSubmit, mergedEmailErrors, mergedConsentErrors, mergedSlackErrors, formError, isPending } =
-    useEnrollForm(action);
+  const {
+    register,
+    handleSubmit,
+    mergedEmailErrors,
+    mergedNameErrors,
+    mergedConsentErrors,
+    mergedSlackErrors,
+    formError,
+    isPending,
+  } = useEnrollForm(action);
 
   return (
     <EnrollFormView
       register={register}
       onSubmit={handleSubmit}
       emailErrors={mergedEmailErrors}
+      nameErrors={mergedNameErrors}
       consentErrors={mergedConsentErrors}
       slackErrors={mergedSlackErrors}
       formError={formError}

@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation';
 import { createContainer } from '../../../../_di/container.server';
 import { UserRoleForm } from '../../../../features/admin/_ui/UserRoleForm';
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const c = createContainer();
-  const result = await c.admin.usecases.getUserDetail(params.id);
+  const { id } = await params;
+  const result = await c.admin.usecases.getUserDetail(id);
 
   const adminEmails = process.env.AUTH_ADMIN_EMAILS?.split(',').map((e) => e.trim()) || [];
 
@@ -36,6 +37,9 @@ export default async function Page({ params }: { params: { id: string } }) {
 
       <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
         <p className="flex items-center gap-2 text-sm text-text-secondary">
+          <span className="w-24 font-semibold">名前:</span> {user.name ?? '未設定'}
+        </p>
+        <p className="mt-2 flex items-center gap-2 text-sm text-text-secondary">
           <span className="w-24 font-semibold">メール:</span> {user.email}
         </p>
         <div className="mt-2 flex items-center gap-2 text-sm text-text-secondary">

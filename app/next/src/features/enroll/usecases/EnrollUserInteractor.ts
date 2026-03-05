@@ -23,6 +23,7 @@ export const createEnrollUserInteractor =
 
     const r = await repo.enroll({
       email: emailR.value,
+      name: input.name?.trim() || undefined,
       consentedAt: new Date(),
       slackUserId: input.slackUserId?.trim() || undefined,
     });

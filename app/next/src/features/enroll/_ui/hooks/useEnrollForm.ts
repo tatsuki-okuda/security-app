@@ -46,6 +46,10 @@ export const useEnrollForm = (action: EnrollAction) => {
     ...(clientErrors.email?.message ? [clientErrors.email.message] : []),
     ...(state.status === 'error' && state.fieldErrors?.email ? state.fieldErrors.email : []),
   ];
+  const mergedNameErrors = [
+    ...(clientErrors.name?.message ? [clientErrors.name.message] : []),
+    ...(state.status === 'error' && state.fieldErrors?.name ? state.fieldErrors.name : []),
+  ];
   const mergedConsentErrors = [
     ...(clientErrors.consent?.message ? [clientErrors.consent.message] : []),
     ...(state.status === 'error' && state.fieldErrors?.consent ? state.fieldErrors.consent : []),
@@ -60,10 +64,14 @@ export const useEnrollForm = (action: EnrollAction) => {
     startTransition(() => {
       const formData = new FormData();
       formData.set('email', String(data.email ?? ''));
+      if (data.name) {
+        formData.set('name', String(data.name));
+      }
       if (data.slackUserId) {
         formData.set('slackUserId', String(data.slackUserId));
       }
-      formData.set('consent', data.consent ? 'true' : 'false');
+      // UIでチェックボックスを非表示にしたため、管理画面から追加時は常に同意済みとする
+      formData.set('consent', 'true');
       formAction(formData);
     });
   });
@@ -75,6 +83,7 @@ export const useEnrollForm = (action: EnrollAction) => {
     handleSubmit,
     clientErrors,
     mergedEmailErrors,
+    mergedNameErrors,
     mergedConsentErrors,
     mergedSlackErrors,
     formError,
