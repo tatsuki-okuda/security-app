@@ -14,10 +14,6 @@ export const createEnrollUserInteractor =
       return err({ type: 'VALIDATION', field: 'consent', message: '訓練への参加に同意してください' });
     }
 
-    if ((input.channel === 'slack' || input.channel === 'both') && !input.slackUserId) {
-      return err({ type: 'VALIDATION', field: 'slackUserId', message: 'Slack ID を入力してください' });
-    }
-
     const emailR = makeEmail(input.email);
     if (!emailR.ok) {
       const message =

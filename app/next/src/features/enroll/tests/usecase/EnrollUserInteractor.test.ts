@@ -15,12 +15,14 @@ describe('登録ユースケース', () => {
     const repo = createRepo();
     const usecase = createEnrollUserInteractor({ repo });
 
-    const result = await usecase({ email: 'user@example.com', consent: false, channel: 'email' });
+    const result = await usecase({ email: 'user@example.com', consent: false });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.type).toBe('VALIDATION');
-      expect(result.error.field).toBe('consent');
+      if (result.error.type === 'VALIDATION') {
+        expect(result.error.field).toBe('consent');
+      }
     }
     expect(repo.enroll).not.toHaveBeenCalled();
   });
@@ -29,12 +31,14 @@ describe('登録ユースケース', () => {
     const repo = createRepo();
     const usecase = createEnrollUserInteractor({ repo });
 
-    const result = await usecase({ email: 'invalid', consent: true, channel: 'email' });
+    const result = await usecase({ email: 'invalid', consent: true });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.type).toBe('VALIDATION');
-      expect(result.error.field).toBe('email');
+      if (result.error.type === 'VALIDATION') {
+        expect(result.error.field).toBe('email');
+      }
     }
     expect(repo.enroll).not.toHaveBeenCalled();
   });
@@ -45,7 +49,7 @@ describe('登録ユースケース', () => {
     });
     const usecase = createEnrollUserInteractor({ repo });
 
-    const result = await usecase({ email: 'user@example.com', consent: true, channel: 'email' });
+    const result = await usecase({ email: 'user@example.com', consent: true });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -58,7 +62,7 @@ describe('登録ユースケース', () => {
     const repo = createRepo();
     const usecase = createEnrollUserInteractor({ repo });
 
-    const result = await usecase({ email: 'user@example.com', consent: true, channel: 'email' });
+    const result = await usecase({ email: 'user@example.com', consent: true });
 
     expect(result.ok).toBe(true);
     expect(repo.enroll).toHaveBeenCalledTimes(1);
@@ -66,16 +70,4 @@ describe('登録ユースケース', () => {
     expect(args.consentedAt).toBeInstanceOf(Date);
   });
 
-  it('Slack配信には Slack ID が必須', async () => {
-    const repo = createRepo();
-    const usecase = createEnrollUserInteractor({ repo });
-
-    const result = await usecase({ email: 'user@example.com', consent: true, channel: 'slack' });
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.field).toBe('slackUserId');
-    }
-    expect(repo.enroll).not.toHaveBeenCalled();
-  });
 });
