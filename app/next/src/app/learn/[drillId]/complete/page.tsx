@@ -23,17 +23,17 @@ export default async function Page({
 
   return (
     <main className="mx-auto mt-12 max-w-2xl space-y-4 px-4 sm:px-0">
-      <h1 className="text-2xl font-semibold text-slate-900">学習完了</h1>
-      <p className="text-sm text-slate-600">合格おめでとうございます。今回の学習は完了です。</p>
+      <h1 className="text-2xl font-semibold text-text-primary">学習完了</h1>
+      <p className="text-sm text-text-secondary">合格おめでとうございます。今回の学習は完了です。</p>
 
-      <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 text-sm text-slate-700 shadow-sm">
-        <p className="font-semibold text-slate-800">最終スコア: {result.value.score} 点</p>
+      <div className="rounded-2xl border border-border bg-surface/80 p-6 text-sm text-text-primary shadow-sm">
+        <p className="font-semibold text-text-primary">最終スコア: {result.value.score} 点</p>
         <p>受験回数: {result.value.attemptCount} 回</p>
       </div>
 
       {result.value.feedback ? (
         <div className="space-y-4">
-          <section className="rounded-2xl border border-indigo-200 bg-white/80 p-6 shadow-sm">
+          <section className="rounded-2xl border border-indigo-200 bg-surface/80 p-6 shadow-sm">
             <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-indigo-900">
               <span className="text-2xl">✨</span> 学習総評
             </h2>
@@ -76,7 +76,7 @@ export default async function Page({
           )}
         </div>
       ) : (
-        <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600">
+        <section className="rounded-2xl border border-border bg-bg p-6 text-sm text-text-secondary">
           次回の訓練でもポイントを意識して、日々の業務に取り組んでください。
         </section>
       )}

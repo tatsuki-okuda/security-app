@@ -26,23 +26,23 @@ export const QuizFormView = ({ questions, action, state, token, drillId, isPendi
         const fieldErrors = state.status === 'error' ? (state.fieldErrors?.[fieldKey] ?? []) : [];
 
         return (
-          <section key={question.id} className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+          <section key={question.id} className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Question {question.order}</p>
-              <h2 className="text-lg font-semibold text-slate-900">{question.questionText}</h2>
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Question {question.order}</p>
+              <h2 className="text-lg font-semibold text-text-primary">{question.questionText}</h2>
             </div>
 
             <div className="mt-4 space-y-3">
               {question.options.map((option) => (
-                <label key={option.id} className="flex items-start gap-3 text-sm text-slate-700">
+                <label key={option.id} className="flex items-start gap-3 text-sm text-text-primary">
                   <input
                     type={question.type === 'radio' ? 'radio' : 'checkbox'}
                     name={fieldKey}
                     value={option.id}
-                    className="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900"
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-text-primary"
                   />
                   <span>
-                    <span className="font-semibold text-slate-800">{option.label}</span> {option.optionText}
+                    <span className="font-semibold text-text-primary">{option.label}</span> {option.optionText}
                   </span>
                 </label>
               ))}
@@ -60,18 +60,18 @@ export const QuizFormView = ({ questions, action, state, token, drillId, isPendi
       })}
 
       {formError ? (
-        <div className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">{formError}</div>
+        <div className="rounded-xl border border-rose-100 bg-error px-4 py-3 text-sm text-rose-700">{formError}</div>
       ) : null}
 
       {failedScore !== null ? (
         <div className="space-y-4">
-          <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-800 shadow-sm">
+          <div className="rounded-xl border border-rose-200 bg-error px-5 py-4 text-rose-800 shadow-sm">
             <h3 className="mb-1 text-base font-bold">不合格です (スコア: {failedScore}点)</h3>
             <p className="text-sm">80点以上で合格となります。以下のフィードバックを参考に、再度挑戦してください。</p>
           </div>
 
           {state.status === 'failed' && state.feedback ? (
-            <div className="space-y-4 rounded-2xl border border-indigo-100 bg-white/60 p-5 shadow-sm">
+            <div className="space-y-4 rounded-2xl border border-indigo-100 bg-surface/60 p-5 shadow-sm">
               <h3 className="flex items-center gap-2 text-base font-bold text-indigo-900">
                 <span className="text-xl">💡</span> AI 学習フィードバック
               </h3>

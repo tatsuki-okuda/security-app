@@ -16,8 +16,8 @@ export default async function Page({ params }: { params: { id: string } }) {
 
     return (
       <main className="mx-auto mt-12 max-w-4xl space-y-3 px-4 sm:px-0">
-        <h1 className="text-2xl font-semibold text-slate-900">訓練詳細</h1>
-        <p className="text-sm text-rose-600">詳細の取得に失敗しました。</p>
+        <h1 className="text-2xl font-semibold text-text-primary">訓練詳細</h1>
+        <p className="text-sm text-error">詳細の取得に失敗しました。</p>
       </main>
     );
   }
@@ -28,20 +28,20 @@ export default async function Page({ params }: { params: { id: string } }) {
     <main className="mx-auto mt-12 max-w-5xl space-y-6 px-4 sm:px-0">
       <header className="space-y-4">
         <div>
-          <Link href="/admin/drills" className="text-sm font-semibold text-slate-500 hover:text-slate-700 transition">
+          <Link href="/admin/drills" className="text-sm font-semibold text-text-secondary hover:text-text-primary transition">
             ← 一覧へ戻る
           </Link>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-slate-900">訓練詳細</h1>
+            <h1 className="text-2xl font-semibold text-text-primary">訓練詳細</h1>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                 drill.status === 'delivering'
                   ? 'bg-indigo-100 text-indigo-700'
                   : drill.status === 'stopped'
-                    ? 'bg-slate-100 text-slate-700'
+                    ? 'bg-bg text-text-primary'
                     : drill.status === 'deliverable'
                       ? 'bg-emerald-100 text-emerald-700'
                       : 'bg-amber-100 text-amber-700'
@@ -63,7 +63,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             {drill.status !== 'stopped' && (
               <Link
                 href={`/admin/drills/${drill.id}/edit`}
-                className="inline-flex items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-slate-50"
+                className="inline-flex items-center rounded-xl bg-surface px-4 py-2 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-bg"
               >
                 編集する
               </Link>
@@ -72,45 +72,45 @@ export default async function Page({ params }: { params: { id: string } }) {
         </div>
       </header>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-        <p className="text-sm text-slate-600">訓練名: {drill.title}</p>
-        <p className="text-sm text-slate-600">状態: {drill.status}</p>
-        <p className="text-sm text-slate-600">チャネル: {drill.channel}</p>
-        <p className="text-sm text-slate-600">送信日: {drill.sentAt ? new Date(drill.sentAt).toLocaleString() : '-'}</p>
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
+        <p className="text-sm text-text-secondary">訓練名: {drill.title}</p>
+        <p className="text-sm text-text-secondary">状態: {drill.status}</p>
+        <p className="text-sm text-text-secondary">チャネル: {drill.channel}</p>
+        <p className="text-sm text-text-secondary">送信日: {drill.sentAt ? new Date(drill.sentAt).toLocaleString() : '-'}</p>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">配信内容</h2>
-        <p className="mt-2 text-sm text-slate-600">件名: {drill.subject}</p>
-        <div className="mt-3 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">{drill.body}</div>
-        <p className="mt-3 text-sm text-slate-600">誘導テキスト</p>
-        <div className="mt-2 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary">配信内容</h2>
+        <p className="mt-2 text-sm text-text-secondary">件名: {drill.subject}</p>
+        <div className="mt-3 whitespace-pre-wrap rounded-xl bg-bg p-4 text-sm text-text-primary">{drill.body}</div>
+        <p className="mt-3 text-sm text-text-secondary">誘導テキスト</p>
+        <div className="mt-2 whitespace-pre-wrap rounded-xl bg-bg p-4 text-sm text-text-primary">
           {drill.guidanceText}
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">クイズ内容</h2>
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary">クイズ内容</h2>
         <div className="mt-4 space-y-4">
           {drill.quizQuestions.map((question) => (
-            <div key={question.id} className="rounded-xl border border-slate-100 p-4">
-              <p className="font-semibold text-slate-800">{question.questionText}</p>
-              <ul className="mt-2 space-y-1 text-sm text-slate-600">
+            <div key={question.id} className="rounded-xl border border-border p-4">
+              <p className="font-semibold text-text-primary">{question.questionText}</p>
+              <ul className="mt-2 space-y-1 text-sm text-text-secondary">
                 {question.options.map((opt) => (
                   <li key={`${question.id}-${opt.label}`}>
                     {opt.label}. {opt.optionText} {opt.isCorrect ? '（正解）' : ''}
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-xs text-slate-500">解説: {question.explanation}</p>
+              <p className="mt-2 text-xs text-text-secondary">解説: {question.explanation}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">行動ログ</h2>
-        <ul className="mt-3 space-y-2 text-sm text-slate-600">
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary">行動ログ</h2>
+        <ul className="mt-3 space-y-2 text-sm text-text-secondary">
           {drill.interactions.map((interaction, idx) => (
             <li key={`${interaction.type}-${idx}`}>
               {interaction.type} - {new Date(interaction.occurredAt).toLocaleString()}
@@ -119,9 +119,9 @@ export default async function Page({ params }: { params: { id: string } }) {
         </ul>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">クイズ結果</h2>
-        <ul className="mt-3 space-y-2 text-sm text-slate-600">
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary">クイズ結果</h2>
+        <ul className="mt-3 space-y-2 text-sm text-text-secondary">
           {drill.quizAttempts.map((attempt, idx) => (
             <li key={`${attempt.score}-${idx}`}>
               スコア: {attempt.score} 点 / {attempt.isPassed ? '合格' : '不合格'}

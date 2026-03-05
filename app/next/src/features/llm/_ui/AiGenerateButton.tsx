@@ -45,7 +45,7 @@ export const AiGenerateButton = ({ action, scenarioType, onGenerated }: Props) =
         {isPending ? '生成中...' : 'AIに生成させる'}
       </button>
       {state.status === 'error' && state.formError && (
-        <span className="ml-2 text-xs text-rose-600">{state.formError}</span>
+        <span className="ml-2 text-xs text-error">{state.formError}</span>
       )}
     </form>
   );

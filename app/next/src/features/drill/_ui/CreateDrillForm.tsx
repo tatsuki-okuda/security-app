@@ -52,25 +52,25 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
 
   return (
     <form action={formAction} className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-800">訓練名</label>
-            <input name="title" className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm" />
+            <label className="text-sm font-semibold text-text-primary">訓練名</label>
+            <input name="title" className="w-full rounded-xl border border-border px-4 py-2 text-sm" />
             {fieldErrors.title?.map((msg) => (
-              <p key={msg} className="text-xs text-rose-600">
+              <p key={msg} className="text-xs text-error">
                 {msg}
               </p>
             ))}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-800">シナリオ</label>
+            <label className="text-sm font-semibold text-text-primary">シナリオ</label>
             <select
               name="scenarioType"
               value={scenarioType}
               onChange={(e) => setScenarioType(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2 text-sm"
             >
               <option value="">選択してください</option>
               {scenarios.map((scenario) => (
@@ -80,15 +80,15 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
               ))}
             </select>
             {fieldErrors.scenarioType?.map((msg) => (
-              <p key={msg} className="text-xs text-rose-600">
+              <p key={msg} className="text-xs text-error">
                 {msg}
               </p>
             ))}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-800">配信チャネル</label>
-            <select name="channel" className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm">
+            <label className="text-sm font-semibold text-text-primary">配信チャネル</label>
+            <select name="channel" className="w-full rounded-xl border border-border px-4 py-2 text-sm">
               <option value="email">メール</option>
               <option value="slack">Slack</option>
               <option value="both">メール + Slack</option>
@@ -97,10 +97,10 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">メール文面</h2>
+            <h2 className="text-lg font-semibold text-text-primary">メール文面</h2>
             <AiGenerateButton
               action={generateContentAction}
               scenarioType={scenarioType}
@@ -109,47 +109,47 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-800">件名</label>
+            <label className="text-sm font-semibold text-text-primary">件名</label>
             <input
               name="subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2 text-sm"
             />
             {fieldErrors.subject?.map((msg) => (
-              <p key={msg} className="text-xs text-rose-600">
+              <p key={msg} className="text-xs text-error">
                 {msg}
               </p>
             ))}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-800">本文</label>
+            <label className="text-sm font-semibold text-text-primary">本文</label>
             <textarea
               name="body"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={6}
-              className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2 text-sm"
             />
             {fieldErrors.body?.map((msg) => (
-              <p key={msg} className="text-xs text-rose-600">
+              <p key={msg} className="text-xs text-error">
                 {msg}
               </p>
             ))}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-800">誘導テキスト</label>
+            <label className="text-sm font-semibold text-text-primary">誘導テキスト</label>
             <textarea
               name="guidanceText"
               value={guidanceText}
               onChange={(e) => setGuidanceText(e.target.value)}
               rows={3}
-              className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm"
+              className="w-full rounded-xl border border-border px-4 py-2 text-sm"
             />
             {fieldErrors.guidanceText?.map((msg) => (
-              <p key={msg} className="text-xs text-rose-600">
+              <p key={msg} className="text-xs text-error">
                 {msg}
               </p>
             ))}
@@ -157,35 +157,35 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-1/2 space-y-2">
-                <label className="text-sm font-semibold text-slate-800">リンクテキスト（CTA）</label>
+                <label className="text-sm font-semibold text-text-primary">リンクテキスト（CTA）</label>
                 <input
                   name="ctaText"
                   value={ctaText}
                   onChange={(e) => setCtaText(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm"
+                  className="w-full rounded-xl border border-border px-4 py-2 text-sm"
                   placeholder="例: パスワードの再設定はこちら"
                 />
               </div>
               <div className="w-1/2 space-y-2">
-                <label className="text-sm font-semibold text-slate-800">リンクURL（プレースホルダ）</label>
+                <label className="text-sm font-semibold text-text-primary">リンクURL（プレースホルダ）</label>
                 <input
                   name="ctaUrlPlaceholder"
                   value={ctaUrlPlaceholder}
                   onChange={(e) => setCtaUrlPlaceholder(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm bg-slate-50"
+                  className="w-full rounded-xl border border-border px-4 py-2 text-sm bg-bg"
                   readOnly
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-800">リスク解説メモ（非公開）</label>
+              <label className="text-sm font-semibold text-text-primary">リスク解説メモ（非公開）</label>
               <textarea
                 name="riskNotes"
                 value={riskNotes}
                 onChange={(e) => setRiskNotes(e.target.value)}
                 rows={2}
-                className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 bg-slate-50"
+                className="w-full rounded-xl border border-border px-4 py-2 text-sm text-text-secondary bg-bg"
               />
             </div>
           </div>
@@ -193,24 +193,24 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
       </section>
 
       {quizQuestions.length > 0 && (
-        <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm space-y-4">
-          <h2 className="text-lg font-semibold text-slate-900">生成されたクイズ問題 ({quizQuestions.length}問)</h2>
+        <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm space-y-4">
+          <h2 className="text-lg font-semibold text-text-primary">生成されたクイズ問題 ({quizQuestions.length}問)</h2>
           <div className="space-y-4">
             {quizQuestions.map((q, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-2">
-                <p className="font-semibold text-sm text-slate-800">
+              <div key={i} className="rounded-xl border border-border p-4 space-y-2">
+                <p className="font-semibold text-sm text-text-primary">
                   Q{q.order}. {q.questionText}
                 </p>
                 <div className="pl-4 space-y-1">
                   {q.options.map((opt, j) => (
-                    <div key={j} className="flex items-center gap-2 text-sm text-slate-600">
+                    <div key={j} className="flex items-center gap-2 text-sm text-text-secondary">
                       <span className={opt.isCorrect ? 'font-bold text-emerald-600' : ''}>
                         {opt.label}. {opt.optionText} {opt.isCorrect && '（正解）'}
                       </span>
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-slate-500 mt-2 bg-slate-50 p-2 rounded">解説: {q.explanation}</p>
+                <p className="text-sm text-text-secondary mt-2 bg-bg p-2 rounded">解説: {q.explanation}</p>
               </div>
             ))}
           </div>
@@ -219,7 +219,7 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
       )}
 
       {state.status === 'error' && state.formError ? (
-        <div className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div className="rounded-xl border border-rose-100 bg-error px-4 py-3 text-sm text-rose-700">
           {state.formError}
         </div>
       ) : null}
@@ -230,7 +230,7 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
           type="submit"
           onClick={() => setSubmitActionType('draft')}
           disabled={isPending}
-          className="inline-flex items-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-slate-50 disabled:opacity-70"
+          className="inline-flex items-center rounded-xl bg-surface px-5 py-3 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-bg disabled:opacity-70"
         >
           {isPending && submitActionType === 'draft' ? '保存中…' : '下書き保存'}
         </button>
