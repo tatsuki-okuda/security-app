@@ -416,7 +416,7 @@
 
 - `/learn/[drillId]/quiz`
 - 内容：
-  - 3〜5問のクイズ（出題形式は LLM が single_choice / multiple_choice / text を決定）
+  - 最低10問（10〜15問程度）のクイズ（出題形式は LLM が single_choice / multiple_choice / text を決定）
   - 合格点：80点以上
   - 受験履歴管理：複数回受験時の全回答を記録
   - LLM による詳細フィードバック（詳細は [doc/drills/quizSpecification.md](./drills/quizSpecification.md) を参照）
