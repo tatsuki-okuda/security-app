@@ -2,7 +2,6 @@ import { err, ok } from '../../../shared/fp/result';
 
 import type { LlmGateway } from './gateway/LlmGateway';
 import type { Result } from '../../../shared/fp/result';
-import type { QuizTemplateQuestion } from '../../drill/domain/quizTemplates';
 
 export type GenerateContentInput = {
   scenarioType: string;
@@ -16,7 +15,6 @@ export type GenerateContentOutput = {
   ctaUrlPlaceholder: string;
   guidanceText: string;
   riskNotes: string;
-  quiz: QuizTemplateQuestion[];
 };
 
 export type GenerateContentError = { type: 'LLM_ERROR'; message: string };

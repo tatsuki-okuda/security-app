@@ -15,6 +15,18 @@ export type GenerateContentActionState =
         ctaText: string;
         ctaUrlPlaceholder: string;
         riskNotes: string;
+      };
+    };
+
+export type GenerateQuizActionState =
+  | { status: 'idle' }
+  | {
+      status: 'error';
+      formError?: string;
+    }
+  | {
+      status: 'success';
+      data: {
         quiz: QuizTemplateQuestion[];
       };
     };

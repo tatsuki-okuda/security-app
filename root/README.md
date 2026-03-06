@@ -189,6 +189,17 @@ Prismaの各種操作は、Dockerコンテナ内から直接実行する方法�
   docker compose -f $(git rev-parse --show-toplevel)/root/docker-compose.yml exec next sh -c "npx prisma studio --port 5555 --browser none"
   ```
 
+### 開発用スクリプト（scripts/）
+
+本プロジェクトには、API や LLM 生成機能などのバックエンドロジックを UI（ブラウザ）を通さずに単体でテスト・検証するための簡単なスクリプトを `app/next/scripts/` ディレクトリに配置しています。
+
+これらのスクリプトは、ターミナルから `npx tsx` コマンド等を用いて直接実行することを想定した開発者向けツールです。
+例：
+```bash
+# LLMの生成ロジックをターミナルから単体実行する
+npx tsx scripts/test-generate.ts
+```
+
 ### ローカルメール開発（Mailpit）
 
 - 開発環境のSMTPは `mailpit:1025` に向くように `root/docker-compose.yml` で設定済み

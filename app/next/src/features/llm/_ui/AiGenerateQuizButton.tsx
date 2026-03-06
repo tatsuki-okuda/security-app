@@ -3,25 +3,20 @@
 import { Bot, Loader2 } from 'lucide-react';
 import { useActionState, useEffect, startTransition } from 'react';
 
-import type { GenerateContentActionState } from '../contracts/generate';
+import type { QuizTemplateQuestion } from '../../drill/domain/quizTemplates';
+import type { GenerateQuizActionState } from '../contracts/generate';
 
 type Props = {
-  action: (prev: GenerateContentActionState, formData: FormData) => Promise<GenerateContentActionState>;
+  action: (prev: GenerateQuizActionState, formData: FormData) => Promise<GenerateQuizActionState>;
   scenarioType: string;
+  emailBody: string;
   userPrompt?: string;
-  onGenerated: (data: {
-    subject: string;
-    body: string;
-    guidanceText: string;
-    ctaText: string;
-    ctaUrlPlaceholder: string;
-    riskNotes: string;
-  }) => void;
+  onGenerated: (data: { quiz: QuizTemplateQuestion[] }) => void;
 };
 
-const initialState: GenerateContentActionState = { status: 'idle' };
+const initialState: GenerateQuizActionState = { status: 'idle' };
 
-export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated }: Props) => {
+export const AiGenerateQuizButton = ({ action, scenarioType, emailBody, userPrompt, onGenerated }: Props) => {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
@@ -30,7 +25,7 @@ export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated
     }
   }, [state, onGenerated]);
 
-  const disabled = isPending || !scenarioType;
+  const disabled = isPending || !scenarioType || !emailBody;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -38,6 +33,7 @@ export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated
     startTransition(() => {
       const formData = new FormData();
       formData.set('scenarioType', scenarioType);
+      formData.set('emailBody', emailBody);
       if (userPrompt) {
         formData.set('userPrompt', userPrompt);
       }
@@ -51,13 +47,13 @@ export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated
         type="button"
         onClick={handleClick}
         disabled={disabled}
-        className="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700 transition hover:bg-green-100 disabled:opacity-50"
       >
         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
-        {isPending ? '生成中...' : 'AIに生成させる'}
+        {isPending ? 'クイズ生成中...' : 'クイズをAI生成'}
       </button>
       {state.status === 'error' && state.formError && (
-        <span className="ml-2 text-xs text-error">{state.formError}</span>
+        <span className="ml-2 pl-2 text-xs text-error">{state.formError}</span>
       )}
     </div>
   );

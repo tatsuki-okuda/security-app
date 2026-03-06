@@ -2,21 +2,25 @@
 
 import { createContainer } from '../../../../_di/container.server';
 
-import type { GenerateContentActionState } from '../../../../features/llm/contracts/generate';
+import type { GenerateQuizActionState } from '../../../../features/llm/contracts/generate';
 
-export const generateContentAction = async (
-  _prev: GenerateContentActionState,
+export const generateQuizAction = async (
+  _prev: GenerateQuizActionState,
   formData: FormData,
-): Promise<GenerateContentActionState> => {
+): Promise<GenerateQuizActionState> => {
   const scenarioType = String(formData.get('scenarioType') ?? '');
+  const emailBody = String(formData.get('emailBody') ?? '');
   const userPrompt = formData.get('userPrompt') ? String(formData.get('userPrompt')) : undefined;
 
   if (!scenarioType) {
     return { status: 'error', formError: 'シナリオを選択してください' };
   }
+  if (!emailBody) {
+    return { status: 'error', formError: 'メール本文が必要です' };
+  }
 
   const c = createContainer();
-  const result = await c.llm.usecases.generateContent({ scenarioType, userPrompt });
+  const result = await c.llm.usecases.generateQuiz({ scenarioType, emailBody, userPrompt });
 
   if (!result.ok) {
     return { status: 'error', formError: result.error.message };
@@ -25,12 +29,7 @@ export const generateContentAction = async (
   return {
     status: 'success',
     data: {
-      subject: result.value.subject,
-      body: result.value.body,
-      guidanceText: result.value.guidanceText,
-      ctaText: result.value.ctaText,
-      ctaUrlPlaceholder: result.value.ctaUrlPlaceholder,
-      riskNotes: result.value.riskNotes,
+      quiz: result.value.quiz,
     },
   };
 };
