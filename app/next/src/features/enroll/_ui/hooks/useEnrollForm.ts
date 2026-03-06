@@ -36,6 +36,9 @@ export const useEnrollForm = (action: EnrollAction) => {
   } = useForm<EnrollInput>({
     resolver: zodResolver(enrollSchema),
     mode: 'onBlur', // blur 時にバリデーション
+    defaultValues: {
+      consent: true, // 管理者画面からの登録時は、暗黙的に同意済みとして扱う
+    },
   });
 
   // useActionState: Server Action 結果を管理
