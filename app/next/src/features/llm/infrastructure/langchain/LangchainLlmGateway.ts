@@ -30,42 +30,17 @@ export const createLangchainLlmGateway = (): LlmGateway => ({
           .string()
           .describe('訓練メール本文と合わせて表示する補足学習テキスト（詐欺を見抜くポイントなど短く解説）。'),
         riskNotes: z.string().describe('このシナリオにおけるリスクのポイントや解説メモ。'),
-        quiz: z
-          .array(
-            z.object({
-              order: z.number().describe('問題の表示順序 (1, 2, 3...)'),
-              questionType: z
-                .enum(['single_choice', 'multiple_choice'])
-                .describe('問題形式（ラジオボタンかチェックボックスか）'),
-              questionText: z.string().describe('問題文'),
-              explanation: z.string().describe('正解後の解説文'),
-              options: z
-                .array(
-                  z.object({
-                    label: z.string().describe('選択肢の記号 (A, B, C...) または表示用ラベル'),
-                    optionText: z.string().describe('選択肢の本文'),
-                    isCorrect: z.boolean().describe('この選択肢が正解かどうか'),
-                  }),
-                )
-                .min(2)
-                .max(5)
-                .describe('選択肢リスト'),
-            }),
-          )
-          .min(10)
-          .max(15)
-          .describe('訓練に紐づくクイズ問題（最低10問、最大15問）'),
       });
 
       const parser = StructuredOutputParser.fromZodSchema(outputSchema);
 
       const prompt = PromptTemplate.fromTemplate(`
 あなたは企業の社内セキュリティ教育を担当するプロフェッショナルなリサーチャー・コピーライターです。
-従業員が本物の標的型攻撃やフィッシング詐欺に引っかからないための「訓練用メール」と、その直後に解かせる「セキュリティクイズ」を作成してください。
+従業員が本物の標的型攻撃やフィッシング詐欺に引っかからないための「訓練用メール」を作成してください。
 
 訓練の目的は「従業員に気づかせること」であり、実害を与えることではありません。
-以下のシナリオ指定に従い、必要な項目のすべてをJSON形式で生成してください。
-
+以下のシナリオ指定に従い、必要な項目の「すべて」を不足なく含めた完全なJSON形式で生成してください。
+特に ctaText などの項目が欠落してはいけません。
 【シナリオ】
 {scenarioType}
 
@@ -91,14 +66,9 @@ export const createLangchainLlmGateway = (): LlmGateway => ({
 ctaText: パスワード再設定ページへ
 ===============
 
-【留意事項（クイズ）】
-- 訓練メールの内容や、そのシナリオに特有のセキュリティ知識（例: 送信元アドレスの確認、緊急性を煽る手口への対処）を問う実践的な問題を最低10問作成してください。
-- まずは設定されたシナリオに沿った問題を作成してください。それでも10問の作成が難しい場合は、シナリオに近いジャンルの「セキュリティ全般」に関する問題を含めて、必ず10問以上になるように調整してください。
-- single_choice（単一選択）または multiple_choice（複数選択） を適切に混ぜてください。
-- 正答の選択肢が必ず1つ以上存在するようにしてください。
-{format_instructions}
-
-{userPromptInstructions}
+【出力形式の厳守】
+必ず以下のフォーマット指示に従い、指定されたすべてのキー（subject, body, ctaText, ctaUrlPlaceholder, guidanceText, riskNotes）を含む有効なJSONを出力してください。
+}
       `);
 
       const chain = RunnableSequence.from([prompt, llm, parser]);
@@ -116,7 +86,90 @@ ctaText: パスワード再設定ページへ
       if (e instanceof Error) {
         return err({ type: 'LLM_ERROR', message: `生成エラー: ${e.message}` });
       }
-      return err({ type: 'LLM_ERROR', message: '不明なAI生成エラーが発生しました' });
+      return err({ type: 'LLM_ERROR', message: `不明なAI生成エラーが発生しました: ${String(e)}` });
+    }
+  },
+
+  generateQuizQuestion: async ({ scenarioType, emailBody, existingQuestionsContext, userPrompt }) => {
+    try {
+      const llm = new ChatOpenAI({
+        modelName: process.env.LLM_MODEL || 'gpt-4o-mini',
+        temperature: 0.7,
+        maxRetries: 1, // エラー時に無限に止まらないようにリトライを減らす
+        maxTokens: 1500, // ローカルLLMのOOMクラッシュを防ぐための出力トークン制限
+        modelKwargs: { num_ctx: 4096 }, // コンテキストウィンドウを制限してメモリ使用量を抑える
+        configuration: {
+          baseURL: process.env.LLM_BASE_URL,
+        },
+      });
+
+      const outputSchema = z.object({
+        order: z.number().describe('問題の表示順序 (1, 2, 3...)。既存の問題の次の連番にすること。'),
+        questionType: z
+          .enum(['single_choice', 'multiple_choice'])
+          .describe('問題形式（ラジオボタンかチェックボックスか）'),
+        questionText: z.string().describe('問題文'),
+        explanation: z.string().describe('正解後の解説文'),
+        options: z
+          .array(
+            z.object({
+              label: z.string().describe('選択肢の記号 (A, B, C...) または表示用ラベル'),
+              optionText: z.string().describe('選択肢の本文'),
+              isCorrect: z.boolean().describe('この選択肢が正解かどうか'),
+            }),
+          )
+          .min(2)
+          .max(5)
+          .describe('選択肢リスト：正解は必ず1つ以上（single_choiceは1つのみ）存在させること'),
+      });
+
+      const parser = StructuredOutputParser.fromZodSchema(outputSchema);
+
+      const prompt = PromptTemplate.fromTemplate(`
+あなたは企業の社内セキュリティ教育を担当するプロフェッショナルなリサーチャー・コピーライターです。
+従業員が本物の標的型攻撃やフィッシング詐欺に引っかからないための「訓練用メール」を読み終えた後に解かせる「セキュリティクイズ」を作成してください。
+
+訓練の目的は「従業員に気づかせること」であり、実害を与えることではありません。
+以下の【シナリオ】と【実際の訓練メール本文】に基づき、実践的な問題を**1問だけ**作成し、指定されたJSON形式で出力してください。
+
+【シナリオ】
+{scenarioType}
+
+【実際の訓練メール本文】
+{emailBody}
+
+【留意事項】
+- 訓練メールの内容や、そのシナリオに特有のセキュリティ知識（例: 送信元アドレスの確認、緊急性を煽る手口への対処）を問う問題にしてください。
+- single_choice（単一選択）または multiple_choice（複数選択） を適切に選んでください。
+- すでに生成されている問題（以下）と重複しない、新しい観点の問題を作成してください。
+{existingQuestionsContext}
+
+【出力形式の厳守】
+必ず以下のフォーマット指示に従い有効なJSONを出力してください。
+{format_instructions}
+
+{userPromptInstructions}
+      `);
+
+      const chain = RunnableSequence.from([prompt, llm, parser]);
+
+      const userPromptInstructions = userPrompt ? `【追加指示】\n以下の指示も必ず考慮して作成してください。\n${userPrompt}\n` : '';
+
+      const response = await chain.invoke({
+        scenarioType,
+        emailBody,
+        existingQuestionsContext: existingQuestionsContext || '（まだ問題は生成されていません）',
+        format_instructions: parser.getFormatInstructions(),
+        userPromptInstructions,
+      });
+
+      return ok(response);
+    } catch (e: any) {
+      console.error('Raw LLM Quiz Gen Error:', e);
+      if (e instanceof Error) {
+        return err({ type: 'LLM_ERROR', message: `クイズ生成エラー: ${e.message}` });
+      }
+      return err({ type: 'LLM_ERROR', message: `不明なAIクイズ生成エラーが発生しました: ${String(e)}` });
     }
   },
 

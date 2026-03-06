@@ -1,4 +1,5 @@
 import { createGenerateDrillContentInteractor } from '../usecases/GenerateDrillContentUseCase';
+import { createGenerateQuizUseCase } from '../usecases/GenerateQuizUseCase';
 import { createReviseDrillContentInteractor } from '../usecases/ReviseDrillContentUseCase';
 
 import { createLangchainLlmGateway } from './langchain/LangchainLlmGateway';
@@ -8,6 +9,7 @@ export const createLlmContainer = () => {
   return {
     usecases: {
       generateContent: createGenerateDrillContentInteractor({ gateway }),
+      generateQuiz: createGenerateQuizUseCase(gateway),
       reviseContent: createReviseDrillContentInteractor({ gateway }),
     },
   };

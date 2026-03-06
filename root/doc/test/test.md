@@ -19,6 +19,9 @@
 - **UI (presentation/components)**: `useActionState` の状態反映、入力制御、エラー表示を検証。
 - **E2E (App Router)**: ルーティング・認証/ロール・副作用記録（クリック・回答保存）・リダイレクトを検証。
 
+## 開発用・手動テストスクリプト（scripts/）
+- UIを介さずに、LLMプロンプトの調整やバックエンドロジックの動作確認をターミナルで単体実行したい場合は、`app/next/scripts/` 配下に `npx tsx` 用のスクリプト（例: `test-generate.ts`）を配置して検証する。
+
 ## テスト配置ルール
 - 基本は **feature ごとに閉じて配置**: `features/<feature>/tests/{unit,usecase,infrastructure,server-actions,ui,e2e}`。
 - `shared` 配下の共通ロジックは `shared/tests/{unit,infrastructure}` などで管理する。

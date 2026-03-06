@@ -209,15 +209,15 @@
     - MVP では固定シナリオをドロップダウンで選択
     - 例：パスワード再設定 / 添付ファイル / 請求・見積 / アカウント警告 / 社内ツール通知 / 配送・ギフト など
     - 将来：`/admin/scenarios` でシナリオの CRUD 管理を実装予定
-  - **AI生成**（LangChain + ローカルLLM；few-shot/RAG/評価は [doc/features/promptStrategy.md](./features/promptStrategy.md)）
+  - **AI生成（メール文面）**（LangChain + ローカルLLM；few-shot/RAG/評価は [doc/features/promptStrategy.md](./features/promptStrategy.md)）
     - **事前プロンプト機能**：生成時に「AIへの追加指示（任意）」を入力し、シナリオに合わせた独自の要件（例：高圧的な態度で等）を反映可能
     - 訓練メール：件名/本文/誘導テキスト等を自動生成
-    - セキュリティクイズ：問題文/選択肢/正解/解説自動生成（出題形式は LLM が single/multiple/text を決定）
   - **メール内容の表示・編集**
     - AI生成結果を表示
     - **手動で件名/本文/誘導テキストを編集可能**
     - **「AI再生成」および「AIで再編集」機能**：文面全体を変えたい場合は全体の再生成、既存の文面をベースに修正指示を出したい場合は追加指示欄に入力してメールテキストのみの推敲が可能
   - **クイズ内容の表示・編集**（詳細は [doc/drills/quizSpecification.md](./drills/quizSpecification.md) を参照）
+    - **「AIで自動生成する」ボタン**：生成された文面をもとにクイズを生成する。安定性のために1問ずつ直列で処理される（チャンキング）。
     - AI生成結果を表示
     - **手動で問題文/出題形式(single/multiple/text)/選択肢/正解/解説を編集可能**
     - **「AI再生成」ボタン**でプロンプト変更＆再生成可能
@@ -417,8 +417,8 @@
 
 - `/learn/[drillId]/quiz`
 - 内容：
-  - 最低10問（10〜15問程度）のクイズ（出題形式は LLM が single_choice / multiple_choice / text を決定）
-  - 合格点：80点以上
+  - **出題数**：3〜5問（※ローカルLLM利用時の機能制限）
+  - **合格点**：80点以上
   - 受験履歴管理：複数回受験時の全回答を記録
   - LLM による詳細フィードバック（詳細は [doc/drills/quizSpecification.md](./drills/quizSpecification.md) を参照）
 

@@ -3,8 +3,10 @@
 import { useActionState, useState } from 'react';
 
 import { generateContentAction } from '../../../app/admin/drills/create/generateContentAction';
+import { generateQuizAction } from '../../../app/admin/drills/create/generateQuizAction';
 import { reviseContentAction } from '../../../app/admin/drills/create/reviseContentAction';
 import { AiGenerateButton } from '../../llm/_ui/AiGenerateButton';
+import { AiGenerateQuizButton } from '../../llm/_ui/AiGenerateQuizButton';
 import { AiReviseButton } from '../../llm/_ui/AiReviseButton';
 
 import type { CreateDrillActionState } from '../contracts/createDrill';
@@ -44,7 +46,6 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     ctaText: string;
     ctaUrlPlaceholder: string;
     riskNotes: string;
-    quiz: QuizTemplateQuestion[];
   }) => {
     setSubject(data.subject);
     setBody(data.body);
@@ -52,7 +53,8 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setCtaText(data.ctaText);
     setCtaUrlPlaceholder(data.ctaUrlPlaceholder);
     setRiskNotes(data.riskNotes);
-    setQuizQuestions(data.quiz);
+    setQuizQuestions([]); // API側でクイズを生成しない仕様に変更されたため、クイズはリセットまたは未設定のままにする
+    // quizは別ステップ（別のボタン）で生成させるようにする予定
     setEditPrompt(''); // 生成し直した場合は編集プロンプトをクリア
   };
 
@@ -71,6 +73,10 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setCtaUrlPlaceholder(data.ctaUrlPlaceholder);
     setRiskNotes(data.riskNotes);
     setEditPrompt(''); // 完了後にプロンプトをクリア
+  };
+
+  const handleAiQuizGenerated = (data: { quiz: QuizTemplateQuestion[] }) => {
+    setQuizQuestions(data.quiz);
   };
 
   return (
@@ -178,6 +184,8 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
             <label className="text-sm font-semibold text-text-primary">誘導テキスト</label>
             <textarea
               name="guidanceText"
+              // API側でクイズを生成しない仕様に変更されたため、クイズはリセットまたは未設定のままにする
+              // quizは別ステップ（別のボタン）で生成させるようにする予定
               value={guidanceText}
               onChange={(e) => setGuidanceText(e.target.value)}
               rows={3}
@@ -256,28 +264,46 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
         </div>
       </section>
 
-      {quizQuestions.length > 0 && (
+      {(subject || body) && (
         <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm space-y-4">
-          <h2 className="text-lg font-semibold text-text-primary">生成されたクイズ問題 ({quizQuestions.length}問)</h2>
-          <div className="space-y-4">
-            {quizQuestions.map((q, i) => (
-              <div key={i} className="rounded-xl border border-border p-4 space-y-2">
-                <p className="font-semibold text-sm text-text-primary">
-                  Q{q.order}. {q.questionText}
-                </p>
-                <div className="pl-4 space-y-1">
-                  {q.options.map((opt, j) => (
-                    <div key={j} className="flex items-center gap-2 text-sm text-text-secondary">
-                      <span className={opt.isCorrect ? 'font-bold text-emerald-600' : ''}>
-                        {opt.label}. {opt.optionText} {opt.isCorrect && '（正解）'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-text-secondary mt-2 bg-bg p-2 rounded">解説: {q.explanation}</p>
-              </div>
-            ))}
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-text-primary">
+              クイズ問題 {quizQuestions.length > 0 && `(${quizQuestions.length}問)`}
+            </h2>
+            <AiGenerateQuizButton
+              action={generateQuizAction}
+              scenarioType={scenarioType}
+              emailBody={body}
+              userPrompt={userPrompt}
+              onGenerated={handleAiQuizGenerated}
+            />
           </div>
+          
+          {quizQuestions.length === 0 && (
+            <p className="text-sm text-text-secondary">「クイズをAI生成」ボタンを押すと、メール本文に沿った実践的なクイズが自動生成されます。</p>
+          )}
+
+          {quizQuestions.length > 0 && (
+            <div className="space-y-4 mt-4">
+              {quizQuestions.map((q, i) => (
+                <div key={i} className="rounded-xl border border-border p-4 space-y-2">
+                  <p className="font-semibold text-sm text-text-primary">
+                    Q{q.order}. {q.questionText}
+                  </p>
+                  <div className="pl-4 space-y-1">
+                    {q.options.map((opt, j) => (
+                      <div key={j} className="flex items-center gap-2 text-sm text-text-secondary">
+                        <span className={opt.isCorrect ? 'font-bold text-emerald-600' : ''}>
+                          {opt.label}. {opt.optionText} {opt.isCorrect && '（正解）'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-text-secondary mt-2 bg-bg p-2 rounded">解説: {q.explanation}</p>
+                </div>
+              ))}
+            </div>
+          )}
           <input type="hidden" name="quizQuestions" value={JSON.stringify(quizQuestions)} />
         </section>
       )}

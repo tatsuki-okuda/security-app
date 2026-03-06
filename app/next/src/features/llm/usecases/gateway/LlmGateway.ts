@@ -13,11 +13,17 @@ export type LlmGateway = {
         ctaUrlPlaceholder: string;
         guidanceText: string;
         riskNotes: string;
-        quiz: QuizTemplateQuestion[];
       },
       LlmGatewayError
     >
   >;
+
+  generateQuizQuestion: (input: {
+    scenarioType: string;
+    emailBody: string;
+    existingQuestionsContext: string;
+    userPrompt?: string;
+  }) => Promise<Result<QuizTemplateQuestion, LlmGatewayError>>;
 
   reviseContent: (input: {
     editPrompt: string;

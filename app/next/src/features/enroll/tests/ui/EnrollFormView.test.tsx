@@ -12,6 +12,7 @@ describe('登録フォーム表示', () => {
       <EnrollFormView
         register={(name) => ({ name, onChange: async () => {}, onBlur: async () => {}, ref: () => {} })}
         onSubmit={noop}
+        nameErrors={[]}
         emailErrors={['メールアドレスを入力してください']}
         slackErrors={['Slack ID を入力してください']}
         consentErrors={['訓練への参加に同意してください']}
