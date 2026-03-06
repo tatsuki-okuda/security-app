@@ -9,7 +9,7 @@ import { err, ok } from '../../../../shared/fp/result';
 import type { LlmGateway } from '../../usecases/gateway/LlmGateway';
 
 export const createLangchainLlmGateway = (): LlmGateway => ({
-  generateContent: async ({ scenarioType }) => {
+  generateContent: async ({ scenarioType, userPrompt }) => {
     try {
       const llm = new ChatOpenAI({
         modelName: process.env.LLM_MODEL || 'gpt-4o-mini',
@@ -96,15 +96,19 @@ ctaText: パスワード再設定ページへ
 - まずは設定されたシナリオに沿った問題を作成してください。それでも10問の作成が難しい場合は、シナリオに近いジャンルの「セキュリティ全般」に関する問題を含めて、必ず10問以上になるように調整してください。
 - single_choice（単一選択）または multiple_choice（複数選択） を適切に混ぜてください。
 - 正答の選択肢が必ず1つ以上存在するようにしてください。
-
 {format_instructions}
+
+{userPromptInstructions}
       `);
 
       const chain = RunnableSequence.from([prompt, llm, parser]);
 
+      const userPromptInstructions = userPrompt ? `【追加指示】\n以下の指示も必ず考慮して作成してください。\n${userPrompt}\n` : '';
+
       const response = await chain.invoke({
         scenarioType,
         format_instructions: parser.getFormatInstructions(),
+        userPromptInstructions,
       });
 
       return ok(response);
@@ -113,6 +117,81 @@ ctaText: パスワード再設定ページへ
         return err({ type: 'LLM_ERROR', message: `生成エラー: ${e.message}` });
       }
       return err({ type: 'LLM_ERROR', message: '不明なAI生成エラーが発生しました' });
+    }
+  },
+
+  reviseContent: async ({
+    editPrompt,
+    currentSubject,
+    currentBody,
+    currentCtaText,
+    currentCtaUrlPlaceholder,
+    currentGuidanceText,
+    currentRiskNotes,
+  }) => {
+    try {
+      const llm = new ChatOpenAI({
+        modelName: process.env.LLM_MODEL || 'gpt-4o-mini',
+        temperature: 0.7,
+        configuration: {
+          baseURL: process.env.LLM_BASE_URL,
+        },
+      });
+
+      const outputSchema = z.object({
+        subject: z.string().describe('メールの件名。'),
+        body: z.string().describe('メールの本文。HTMLタグは使用せずプレーンテキストで記述。'),
+        ctaText: z.string().describe('本文内でクリックを促すリンクのテキスト文字列。'),
+        ctaUrlPlaceholder: z.string().describe('リンク先URLのプレースホルダ。必ず元のプレースホルダを維持すること。'),
+        guidanceText: z.string().describe('訓練メール本文と合わせて表示する補足学習テキスト。'),
+        riskNotes: z.string().describe('このシナリオにおけるリスクのポイントや解説メモ。'),
+      });
+
+      const parser = StructuredOutputParser.fromZodSchema(outputSchema);
+
+      const prompt = PromptTemplate.fromTemplate(`
+あなたは企業の社内セキュリティ教育を担当するプロフェッショナルなリサーチャー・コピーライターです。
+現在作成中の「訓練用メールの文面」に対して、ユーザーから修正の指示がありました。
+以下の【元の文章群】と【修正指示】に基づき、内容を洗練・推敲してJSON形式で出力してください。
+
+【元の文章群】
+- 件名: {currentSubject}
+- 本文:
+{currentBody}
+- CTAテキスト: {currentCtaText}
+- CTAプレースホルダ: {currentCtaUrlPlaceholder}
+- 誘導テキスト: {currentGuidanceText}
+- リスク解説メモ: {currentRiskNotes}
+
+【修正指示】
+{editPrompt}
+
+【留意事項】
+- メールの基本構成やセキュリティ訓練としての妥当性は損なわないようにしてください。
+- CTAプレースホルダは特別な指示がない限り元の値を維持し、適切に本文に配置してください。
+
+{format_instructions}
+      `);
+
+      const chain = RunnableSequence.from([prompt, llm, parser]);
+
+      const response = await chain.invoke({
+        currentSubject,
+        currentBody,
+        currentCtaText,
+        currentCtaUrlPlaceholder,
+        currentGuidanceText,
+        currentRiskNotes,
+        editPrompt,
+        format_instructions: parser.getFormatInstructions(),
+      });
+
+      return ok(response);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return err({ type: 'LLM_ERROR', message: `推敲エラー: ${e.message}` });
+      }
+      return err({ type: 'LLM_ERROR', message: '不明なAI推敲エラーが発生しました' });
     }
   },
 

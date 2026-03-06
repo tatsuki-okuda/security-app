@@ -9,13 +9,14 @@ export const generateContentAction = async (
   formData: FormData,
 ): Promise<GenerateContentActionState> => {
   const scenarioType = String(formData.get('scenarioType') ?? '');
+  const userPrompt = formData.get('userPrompt') ? String(formData.get('userPrompt')) : undefined;
 
   if (!scenarioType) {
     return { status: 'error', formError: 'シナリオを選択してください' };
   }
 
   const c = createContainer();
-  const result = await c.llm.usecases.generateContent({ scenarioType });
+  const result = await c.llm.usecases.generateContent({ scenarioType, userPrompt });
 
   if (!result.ok) {
     return { status: 'error', formError: result.error.message };

@@ -3,7 +3,9 @@
 import { useActionState, useState } from 'react';
 
 import { generateContentAction } from '../../../app/admin/drills/create/generateContentAction';
+import { reviseContentAction } from '../../../app/admin/drills/create/reviseContentAction';
 import { AiGenerateButton } from '../../llm/_ui/AiGenerateButton';
+import { AiReviseButton } from '../../llm/_ui/AiReviseButton';
 
 import type { CreateDrillActionState } from '../contracts/createDrill';
 import type { QuizTemplateQuestion } from '../domain/quizTemplates';
@@ -28,6 +30,9 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
   const [ctaUrlPlaceholder, setCtaUrlPlaceholder] = useState('');
   const [riskNotes, setRiskNotes] = useState('');
   const [quizQuestions, setQuizQuestions] = useState<QuizTemplateQuestion[]>([]);
+  
+  const [userPrompt, setUserPrompt] = useState('');
+  const [editPrompt, setEditPrompt] = useState('');
 
   // どのアクションボタンが押されたかを判定するためのstate
   const [submitActionType, setSubmitActionType] = useState<'draft' | 'deliverable' | 'delivering'>('draft');
@@ -48,6 +53,24 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setCtaUrlPlaceholder(data.ctaUrlPlaceholder);
     setRiskNotes(data.riskNotes);
     setQuizQuestions(data.quiz);
+    setEditPrompt(''); // 生成し直した場合は編集プロンプトをクリア
+  };
+
+  const handleAiRevised = (data: {
+    subject: string;
+    body: string;
+    guidanceText: string;
+    ctaText: string;
+    ctaUrlPlaceholder: string;
+    riskNotes: string;
+  }) => {
+    setSubject(data.subject);
+    setBody(data.body);
+    setGuidanceText(data.guidanceText);
+    setCtaText(data.ctaText);
+    setCtaUrlPlaceholder(data.ctaUrlPlaceholder);
+    setRiskNotes(data.riskNotes);
+    setEditPrompt(''); // 完了後にプロンプトをクリア
   };
 
   return (
@@ -99,13 +122,25 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
 
       <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-text-primary">メール文面</h2>
-            <AiGenerateButton
-              action={generateContentAction}
-              scenarioType={scenarioType}
-              onGenerated={handleAiGenerated}
-            />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-2">
+              <h2 className="text-lg font-semibold text-text-primary">メール文面</h2>
+              <textarea
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
+                placeholder="AIへの追加指示（例: もっと緊急性を煽って、社長になりすまして 等）"
+                rows={2}
+                className="w-full rounded-xl border border-border px-4 py-2 text-sm text-text-secondary bg-surface"
+              />
+            </div>
+            <div className="pt-8">
+              <AiGenerateButton
+                action={generateContentAction}
+                scenarioType={scenarioType}
+                userPrompt={userPrompt}
+                onGenerated={handleAiGenerated}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -189,6 +224,35 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
               />
             </div>
           </div>
+
+          {(subject || body) && (
+            <div className="mt-6 border-t border-border pt-6 space-y-4">
+              <h3 className="text-sm font-semibold text-text-primary">生成した文面の再編集</h3>
+              <div className="flex items-start gap-4">
+                <textarea
+                  value={editPrompt}
+                  onChange={(e) => setEditPrompt(e.target.value)}
+                  placeholder="修正指示を入力（例: もっと丁寧な口調に直して、短くして 等）"
+                  rows={2}
+                  className="flex-1 rounded-xl border border-border px-4 py-2 text-sm text-text-secondary bg-surface"
+                />
+                <AiReviseButton
+                  action={reviseContentAction}
+                  editPrompt={editPrompt}
+                  currentData={{
+                    subject,
+                    body,
+                    ctaText,
+                    ctaUrlPlaceholder,
+                    guidanceText,
+                    riskNotes,
+                  }}
+                  onRevised={handleAiRevised}
+                />
+              </div>
+              <p className="text-xs text-text-secondary">※再編集を実行しても、下のクイズ内容は保持されます。</p>
+            </div>
+          )}
         </div>
       </section>
 

@@ -9,6 +9,7 @@ import type { GenerateContentActionState } from '../contracts/generate';
 type Props = {
   action: (prev: GenerateContentActionState, formData: FormData) => Promise<GenerateContentActionState>;
   scenarioType: string;
+  userPrompt?: string;
   onGenerated: (data: {
     subject: string;
     body: string;
@@ -22,7 +23,7 @@ type Props = {
 
 const initialState: GenerateContentActionState = { status: 'idle' };
 
-export const AiGenerateButton = ({ action, scenarioType, onGenerated }: Props) => {
+export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated }: Props) => {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
@@ -39,6 +40,9 @@ export const AiGenerateButton = ({ action, scenarioType, onGenerated }: Props) =
     startTransition(() => {
       const formData = new FormData();
       formData.set('scenarioType', scenarioType);
+      if (userPrompt) {
+        formData.set('userPrompt', userPrompt);
+      }
       formAction(formData);
     });
   };
