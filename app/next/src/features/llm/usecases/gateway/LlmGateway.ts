@@ -4,7 +4,7 @@ import type { QuizTemplateQuestion } from '../../../drill/domain/quizTemplates';
 export type LlmGatewayError = { type: 'LLM_ERROR'; message: string };
 
 export type LlmGateway = {
-  generateContent: (input: { scenarioType: string }) => Promise<
+  generateContent: (input: { scenarioType: string; userPrompt?: string }) => Promise<
     Result<
       {
         subject: string;
@@ -18,7 +18,28 @@ export type LlmGateway = {
       LlmGatewayError
     >
   >;
-  
+
+  reviseContent: (input: {
+    editPrompt: string;
+    currentSubject: string;
+    currentBody: string;
+    currentCtaText: string;
+    currentCtaUrlPlaceholder: string;
+    currentGuidanceText: string;
+    currentRiskNotes: string;
+  }) => Promise<
+    Result<
+      {
+        subject: string;
+        body: string;
+        ctaText: string;
+        ctaUrlPlaceholder: string;
+        guidanceText: string;
+        riskNotes: string;
+      },
+      LlmGatewayError
+    >
+  >;
   generateQuizFeedback: (input: {
     history: {
       attemptNo: number;

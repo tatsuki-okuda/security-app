@@ -6,6 +6,7 @@ import type { QuizTemplateQuestion } from '../../drill/domain/quizTemplates';
 
 export type GenerateContentInput = {
   scenarioType: string;
+  userPrompt?: string;
 };
 
 export type GenerateContentOutput = {
@@ -29,7 +30,10 @@ export type GenerateDrillDeps = { gateway: LlmGateway };
 export const createGenerateDrillContentInteractor =
   ({ gateway }: GenerateDrillDeps): GenerateDrillContentUseCase =>
   async (input: GenerateContentInput) => {
-    const result = await gateway.generateContent({ scenarioType: input.scenarioType });
+    const result = await gateway.generateContent({
+      scenarioType: input.scenarioType,
+      userPrompt: input.userPrompt,
+    });
 
     if (!result.ok) {
       return err({ type: 'LLM_ERROR', message: result.error.message });

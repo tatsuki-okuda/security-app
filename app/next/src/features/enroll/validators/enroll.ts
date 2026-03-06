@@ -6,7 +6,7 @@ export const enrollSchema = z.object({
   email: emailSchema,
   name: z.string().trim().optional(),
   slackUserId: z.string().trim().optional(),
-  consent: z.boolean().optional().default(true),
+  consent: z.boolean().optional(),
 });
 
 export type EnrollInput = z.infer<typeof enrollSchema>;
