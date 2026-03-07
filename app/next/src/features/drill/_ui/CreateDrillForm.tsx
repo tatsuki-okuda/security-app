@@ -3,14 +3,12 @@
 import { useActionState, useState } from 'react';
 
 import { generateContentAction } from '../../../app/admin/drills/create/generateContentAction';
-import { generateQuizAction } from '../../../app/admin/drills/create/generateQuizAction';
 import { reviseContentAction } from '../../../app/admin/drills/create/reviseContentAction';
+import { MAX_USER_PROMPT_LENGTH } from '../../llm/domain/userPromptValidation';
 import { AiGenerateButton } from '../../llm/_ui/AiGenerateButton';
-import { AiGenerateQuizButton } from '../../llm/_ui/AiGenerateQuizButton';
 import { AiReviseButton } from '../../llm/_ui/AiReviseButton';
 
 import type { CreateDrillActionState } from '../contracts/createDrill';
-import type { QuizTemplateQuestion } from '../domain/quizTemplates';
 import type { Scenario } from '../domain/scenarios';
 
 type Props = {
@@ -31,13 +29,11 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
   const [ctaText, setCtaText] = useState('');
   const [ctaUrlPlaceholder, setCtaUrlPlaceholder] = useState('');
   const [riskNotes, setRiskNotes] = useState('');
-  const [quizQuestions, setQuizQuestions] = useState<QuizTemplateQuestion[]>([]);
   
   const [userPrompt, setUserPrompt] = useState('');
   const [editPrompt, setEditPrompt] = useState('');
-
-  // どのアクションボタンが押されたかを判定するためのstate
-  const [submitActionType, setSubmitActionType] = useState<'draft' | 'deliverable' | 'delivering'>('draft');
+  const [bodyQualityWarning, setBodyQualityWarning] = useState('');
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   const handleAiGenerated = (data: {
     subject: string;
@@ -46,6 +42,7 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     ctaText: string;
     ctaUrlPlaceholder: string;
     riskNotes: string;
+    bodyQualityWarning?: string;
   }) => {
     setSubject(data.subject);
     setBody(data.body);
@@ -53,8 +50,7 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setCtaText(data.ctaText);
     setCtaUrlPlaceholder(data.ctaUrlPlaceholder);
     setRiskNotes(data.riskNotes);
-    setQuizQuestions([]); // API側でクイズを生成しない仕様に変更されたため、クイズはリセットまたは未設定のままにする
-    // quizは別ステップ（別のボタン）で生成させるようにする予定
+    setBodyQualityWarning(data.bodyQualityWarning ?? '');
     setEditPrompt(''); // 生成し直した場合は編集プロンプトをクリア
   };
 
@@ -72,11 +68,8 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setCtaText(data.ctaText);
     setCtaUrlPlaceholder(data.ctaUrlPlaceholder);
     setRiskNotes(data.riskNotes);
+    setBodyQualityWarning(''); // 再編集後は警告をクリア
     setEditPrompt(''); // 完了後にプロンプトをクリア
-  };
-
-  const handleAiQuizGenerated = (data: { quiz: QuizTemplateQuestion[] }) => {
-    setQuizQuestions(data.quiz);
   };
 
   return (
@@ -133,11 +126,26 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
               <h2 className="text-lg font-semibold text-text-primary">メール文面</h2>
               <textarea
                 value={userPrompt}
-                onChange={(e) => setUserPrompt(e.target.value)}
+                onChange={(e) => {
+                  setUserPrompt(e.target.value);
+                  setGenerateError(null);
+                }}
                 placeholder="AIへの追加指示（例: もっと緊急性を煽って、社長になりすまして 等）"
                 rows={2}
+                maxLength={MAX_USER_PROMPT_LENGTH}
                 className="w-full rounded-xl border border-border px-4 py-2 text-sm text-text-secondary bg-surface"
+                aria-describedby="user-prompt-hint"
+                aria-invalid={!!generateError}
+                aria-errormessage={generateError ? 'generate-error' : undefined}
               />
+              <p id="user-prompt-hint" className="text-xs text-text-secondary">
+                {MAX_USER_PROMPT_LENGTH}文字以内。差出人・トーン・文体などのスタイル指示のみ入力してください。生成後に本文に不適切な表現が含まれていると警告が表示されます。
+              </p>
+              {generateError && (
+                <p id="generate-error" role="alert" className="text-xs text-error">
+                  {generateError}
+                </p>
+              )}
             </div>
             <div className="pt-8">
               <AiGenerateButton
@@ -145,10 +153,19 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
                 scenarioType={scenarioType}
                 userPrompt={userPrompt}
                 onGenerated={handleAiGenerated}
+                onError={setGenerateError}
               />
             </div>
           </div>
 
+          {bodyQualityWarning && (
+            <div
+              role="alert"
+              className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            >
+              {bodyQualityWarning}
+            </div>
+          )}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-text-primary">件名</label>
             <input
@@ -184,8 +201,6 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
             <label className="text-sm font-semibold text-text-primary">誘導テキスト</label>
             <textarea
               name="guidanceText"
-              // API側でクイズを生成しない仕様に変更されたため、クイズはリセットまたは未設定のままにする
-              // quizは別ステップ（別のボタン）で生成させるようにする予定
               value={guidanceText}
               onChange={(e) => setGuidanceText(e.target.value)}
               rows={3}
@@ -258,55 +273,10 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
                   onRevised={handleAiRevised}
                 />
               </div>
-              <p className="text-xs text-text-secondary">※再編集を実行しても、下のクイズ内容は保持されます。</p>
             </div>
           )}
         </div>
       </section>
-
-      {(subject || body) && (
-        <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-text-primary">
-              クイズ問題 {quizQuestions.length > 0 && `(${quizQuestions.length}問)`}
-            </h2>
-            <AiGenerateQuizButton
-              action={generateQuizAction}
-              scenarioType={scenarioType}
-              emailBody={body}
-              userPrompt={userPrompt}
-              onGenerated={handleAiQuizGenerated}
-            />
-          </div>
-          
-          {quizQuestions.length === 0 && (
-            <p className="text-sm text-text-secondary">「クイズをAI生成」ボタンを押すと、メール本文に沿った実践的なクイズが自動生成されます。</p>
-          )}
-
-          {quizQuestions.length > 0 && (
-            <div className="space-y-4 mt-4">
-              {quizQuestions.map((q, i) => (
-                <div key={i} className="rounded-xl border border-border p-4 space-y-2">
-                  <p className="font-semibold text-sm text-text-primary">
-                    Q{q.order}. {q.questionText}
-                  </p>
-                  <div className="pl-4 space-y-1">
-                    {q.options.map((opt, j) => (
-                      <div key={j} className="flex items-center gap-2 text-sm text-text-secondary">
-                        <span className={opt.isCorrect ? 'font-bold text-emerald-600' : ''}>
-                          {opt.label}. {opt.optionText} {opt.isCorrect && '（正解）'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-sm text-text-secondary mt-2 bg-bg p-2 rounded">解説: {q.explanation}</p>
-                </div>
-              ))}
-            </div>
-          )}
-          <input type="hidden" name="quizQuestions" value={JSON.stringify(quizQuestions)} />
-        </section>
-      )}
 
       {state.status === 'error' && state.formError ? (
         <div className="rounded-xl border border-rose-100 bg-error px-4 py-3 text-sm text-rose-700">
@@ -315,30 +285,13 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
       ) : null}
 
       <div className="flex items-center justify-end gap-3">
-        <input type="hidden" name="actionType" value={submitActionType} />
+        <input type="hidden" name="actionType" value="draft" />
         <button
           type="submit"
-          onClick={() => setSubmitActionType('draft')}
-          disabled={isPending}
-          className="inline-flex items-center rounded-xl bg-surface px-5 py-3 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-bg disabled:opacity-70"
-        >
-          {isPending && submitActionType === 'draft' ? '保存中…' : '下書き保存'}
-        </button>
-        <button
-          type="submit"
-          onClick={() => setSubmitActionType('deliverable')}
-          disabled={isPending}
-          className="inline-flex items-center rounded-xl bg-indigo-50 px-5 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-100 disabled:opacity-70"
-        >
-          {isPending && submitActionType === 'deliverable' ? '処理中…' : '配信可能にする'}
-        </button>
-        <button
-          type="submit"
-          onClick={() => setSubmitActionType('delivering')}
           disabled={isPending}
           className="inline-flex items-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-70"
         >
-          {isPending && submitActionType === 'delivering' ? '送信中…' : 'いますぐ配信'}
+          {isPending ? '保存中…' : '同意して保存（次へ）'}
         </button>
       </div>
     </form>

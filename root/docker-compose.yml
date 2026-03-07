@@ -16,13 +16,6 @@ services:
       - "1025:1025"
       - "8025:8025"
 
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-
   next:
     build:
       context: ../app/next
@@ -43,9 +36,7 @@ services:
     depends_on:
       - db
       - mailpit
-      - ollama
 
 volumes:
   dbdata:
   node_modules:
-  ollama-data:

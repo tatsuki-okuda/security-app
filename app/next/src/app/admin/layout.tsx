@@ -1,4 +1,5 @@
 import { auth, signIn, signOut } from '@/auth';
+
 import { AdminLayoutShell } from '../../features/admin/_ui/components/AdminLayoutShell';
 
 export const dynamic = 'force-dynamic';

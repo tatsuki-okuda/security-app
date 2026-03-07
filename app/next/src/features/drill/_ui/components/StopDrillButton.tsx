@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { stopDrillAction } from '../actions';
+import { stopDrillAction } from '../../../../app/admin/drills/[id]/actions';
 
 type Props = {
   drillId: string;

@@ -29,6 +29,14 @@ export type DrillRepository = {
     status: 'draft' | 'deliverable' | 'delivering' | 'stopped';
     quiz: QuizTemplateQuestion[];
   }) => Promise<Result<{ drillId: string }, DrillRepoError>>;
+  updateDrillWithQuiz: (input: {
+    drillId: string;
+    subject: string;
+    body: string;
+    guidanceText: string;
+    status: 'draft' | 'deliverable' | 'delivering' | 'stopped';
+    quiz: QuizTemplateQuestion[];
+  }) => Promise<Result<void, DrillRepoError>>;
   listDeliveryTargets: () => Promise<Result<DeliveryTarget[], DrillRepoError>>;
   ensureDeliveryChannels: () => Promise<Result<{ emailChannelId: string; slackChannelId: string }, DrillRepoError>>;
   createRecipientsAndTokens: (input: {

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createLangchainLlmGateway } from '../src/features/llm/infrastructure/langchain/LangchainLlmGateway';
 
 // Force local connections for the test

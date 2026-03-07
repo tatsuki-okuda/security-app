@@ -15,6 +15,8 @@ export type GenerateContentActionState =
         ctaText: string;
         ctaUrlPlaceholder: string;
         riskNotes: string;
+        /** 本文に訓練と分かる表現が含まれていた場合の運用者向け警告 */
+        bodyQualityWarning?: string;
       };
     };
 

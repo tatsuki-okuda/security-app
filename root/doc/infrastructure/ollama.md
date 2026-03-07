@@ -2,26 +2,23 @@
 
 このプロジェクトでは、ローカルで安全かつ無料でAI機能（訓練コンテンツの生成やAIフィードバック分析）を動かすためのLLMエンジンとして **Ollama** をサポートしています。
 
-Ollamaは `docker-compose.yml` にサービスとして組み込まれており、データベース（PostgreSQL）やメール確認ツール（Mailpit）と一緒に一元管理できます。
+Ollamaは、以前は `docker-compose.yml` に組み込まれていましたが、MacのDocker上ではGPU（Apple Silicon）が活用できずに生成が極めて遅延する（タイムアウトする）制約があるため、**Mac本体のホスト側に直接インストールして動かすアーキテクチャ** に変更されています。
 
-## 1. Ollamaコンテナの起動
+## 1. Ollamaのインストールと起動
 
-他のサービスと同様に、`docker-compose` コマンド（または設定済みのエイリアス）を使って起動します。
+Macの場合、Homebrewを使ってホストOSに直接インストールします。
 
 ```bash
-# プロジェクトルートで起動 (Podman の場合)
-podman compose -f root/docker-compose.yml up -d
+# Ollamaのインストール
+brew install ollama
 
-# プロジェクトルートで起動 (Docker の場合)
-docker compose -f root/docker-compose.yml up -d
-
-# エイリアスを使用する場合
-pmc-up
+# サービスの起動（バックグラウンドで起動し、PC再起動時も自動起動）
+brew services start ollama
 ```
 
 ## 2. 言語モデル（LLM）のダウンロード
 
-コンテナが起動した直後は、Ollama内にモデルデータがありません。使用したいモデルをOllamaコンテナ内にダウンロード（Pull）する必要があります。
+インストール直後は、Ollama内にモデルデータがありません。使用したいモデルをホスト環境側にダウンロード（Pull）する必要があります。
 
 ### 推奨モデル（日本語対応・性能重視）
 
@@ -36,28 +33,17 @@ pmc-up
 
 ### モデルのPull手順
 
-コンテナ名を確認してから、以下のコマンドでモデルをPullします。
+以下のコマンドをターミナルで実行してモデルをPullします。
 
 ```bash
-# 現在起動しているOllamaコンテナを確認 (エイリアス または podman/docker ps)
-pmc-ps  # または podman ps / docker ps
-
-# Ollamaコンテナ内でモデルをPull（例として最もおすすめの qwen2.5 を取得）
-# Podman の場合:
-podman exec -it <ollamaのコンテナ名> ollama pull qwen2.5
-
-# Docker の場合:
-docker exec -it <ollamaのコンテナ名> ollama pull qwen2.5
+# モデルをPull（例として最もおすすめの qwen2.5 を取得）
+ollama pull qwen2.5
 ```
 ※ モデルのサイズにより数GBのダウンロードが発生します。完了するまでお待ちください。
 
-特定のモデルと対話して動作確認したい場合は、`run` コマンドを使用します。
+特定のモデルと対話して動作確認（チャット）したい場合は、`run` コマンドを使用します。
 ```bash
-# Podman の場合:
-podman exec -it <ollamaのコンテナ名> ollama run qwen2.5
-
-# Docker の場合:
-docker exec -it <ollamaのコンテナ名> ollama run qwen2.5
+ollama run qwen2.5
 ```
 
 ## 3. アプリケーション（Next.js）との連携設定
@@ -65,11 +51,11 @@ docker exec -it <ollamaのコンテナ名> ollama run qwen2.5
 Next.jsアプリからOllamaを利用するために、`app/next/.env` ファイルに以下の設定を追加します。
 
 ### Next.jsをコンテナ内で動かしている場合（デフォルト）
-Next.jsとOllamaが同じDockerネットワーク内にいるため、コンテナ名である `ollama` をホストとして指定します。
+Docker内にあるNext.jsから、Mac本体（ホストOS）で動いているOllamaへアクセスするためには `host.docker.internal` を使用します。
 
 ```env
 # LangChainにOllamaのエンドポイントを認識させる
-LLM_BASE_URL=http://ollama:11434/v1
+LLM_BASE_URL=http://host.docker.internal:11434/v1
 
 # 使用するモデル名（Pullしたモデル名と合わせる）
 LLM_MODEL=qwen2.5

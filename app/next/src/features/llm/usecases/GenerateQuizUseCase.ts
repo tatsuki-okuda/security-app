@@ -1,6 +1,7 @@
 import { err, ok, type Result } from '../../../shared/fp/result';
-import type { QuizTemplateQuestion } from '../../drill/domain/quizTemplates';
+
 import type { LlmGateway } from './gateway/LlmGateway';
+import type { QuizTemplateQuestion } from '../../drill/domain/quizTemplates';
 
 export type GenerateQuizInput = {
   scenarioType: string;
@@ -38,7 +39,6 @@ export const createGenerateQuizUseCase = (llmGateway: LlmGateway): GenerateQuizU
         });
 
         if (!result.ok) {
-          console.error(`問題 ${i + 1} の生成中にLLMエラーが発生しました。処理を中断します。`, result.error);
           return err({
             type: 'LLM_ERROR',
             message: `問題 ${i + 1} の生成に失敗しました: ${result.error.message}`,
@@ -57,8 +57,7 @@ export const createGenerateQuizUseCase = (llmGateway: LlmGateway): GenerateQuizU
           message: '指定された数の問題をすべて生成できませんでした。',
         });
       }
-    } catch (e) {
-      console.error('Quiz Generation UseCase Error:', e);
+    } catch {
       return err({ type: 'LLM_ERROR', message: '不明なクイズ生成エラーが発生しました' });
     }
   };

@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { createContainer } from '../../../../_di/container.server';
-
-import { StopDrillButton } from './_ui/StopDrillButton';
+import { StopDrillButton } from '../../../../features/drill/_ui/components/StopDrillButton';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const c = createContainer();

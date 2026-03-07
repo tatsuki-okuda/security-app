@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { createContainer } from '../../../_di/container.server';
-import { DrillTable } from './DrillTable';
+import { DrillTable } from '../../../features/drill/_ui/components/DrillTable';
 
 export default async function Page() {
   const c = createContainer();

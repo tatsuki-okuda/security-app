@@ -17,11 +17,13 @@ type Props = {
     ctaUrlPlaceholder: string;
     riskNotes: string;
   }) => void;
+  /** エラーメッセージを親で表示する場合に渡す。未指定ならボタン横に表示 */
+  onError?: (message: string | null) => void;
 };
 
 const initialState: GenerateContentActionState = { status: 'idle' };
 
-export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated }: Props) => {
+export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated, onError }: Props) => {
   const [state, formAction, isPending] = useActionState(action, initialState);
 
   useEffect(() => {
@@ -29,6 +31,12 @@ export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated
       onGenerated(state.data);
     }
   }, [state, onGenerated]);
+
+  useEffect(() => {
+    if (onError) {
+      onError(state.status === 'error' && state.formError ? state.formError : null);
+    }
+  }, [state.status, state.formError, onError]);
 
   const disabled = isPending || !scenarioType;
 
@@ -56,7 +64,7 @@ export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated
         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
         {isPending ? '生成中...' : 'AIに生成させる'}
       </button>
-      {state.status === 'error' && state.formError && (
+      {!onError && state.status === 'error' && state.formError && (
         <span className="ml-2 text-xs text-error">{state.formError}</span>
       )}
     </div>
