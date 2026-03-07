@@ -44,6 +44,9 @@ export type DrillDetail = {
   scenarioId: string | null;
   status: string;
   channel: string;
+  targetType: string;
+  targetCount: number | null;
+  targetUserIds: string[] | null;
   subject: string;
   body: string;
   guidanceText: string;

@@ -6,7 +6,7 @@ import { err, ok } from '../../../../shared/fp/result';
 import { DrillRepository } from '../../usecases/gateway/DrillRepository';
 
 export const createPrismaDrillRepository = (): DrillRepository => ({
-  createDrillWithQuiz: async ({ title, scenarioType, channel, subject, body, guidanceText, status, quiz }) => {
+  createDrillWithQuiz: async ({ title, scenarioType, channel, targetType, targetCount, targetUserIds, subject, body, guidanceText, status, quiz }) => {
     try {
       const drill = await prisma.$transaction(async (tx) => {
         const created = await tx.drill.create({
@@ -15,6 +15,9 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
             scenarioId: scenarioType,
             status,
             channel,
+            targetType,
+            targetCount,
+            targetUserIds: targetUserIds ? JSON.stringify(targetUserIds) : null,
             subject,
             body,
             guidanceText,
@@ -53,13 +56,17 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
     }
   },
-  updateDrillWithQuiz: async ({ drillId, subject, body, guidanceText, status, quiz }) => {
+  updateDrillWithQuiz: async ({ drillId, channel, targetType, targetCount, targetUserIds, subject, body, guidanceText, status, quiz }) => {
     try {
       await prisma.$transaction(async (tx) => {
         await tx.drill.update({
           where: { id: drillId },
           data: {
             status,
+            channel,
+            targetType,
+            targetCount,
+            targetUserIds: targetUserIds ? JSON.stringify(targetUserIds) : null,
             subject,
             body,
             guidanceText,
@@ -113,19 +120,30 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
     }
   },
-  listDeliveryTargets: async () => {
+  listDeliveryTargets: async ({ targetType, targetCount, targetUserIds }) => {
     try {
-      const users = await prisma.user.findMany({
-        where: {
-          consentedAt: { not: null },
-          optedOut: false,
-        },
+      const whereClause: import('@prisma/client').Prisma.UserWhereInput = {
+        consentedAt: { not: null },
+        optedOut: false,
+      };
+
+      if (targetType === 'specific' && targetUserIds && targetUserIds.length > 0) {
+        whereClause.id = { in: targetUserIds };
+      }
+
+      let users = await prisma.user.findMany({
+        where: whereClause,
         select: {
           id: true,
           email: true,
           slackUserId: true,
         },
       });
+
+      if (targetType === 'random' && targetCount && targetCount > 0) {
+        // Simple random sampling for MVP
+        users = users.sort(() => 0.5 - Math.random()).slice(0, targetCount);
+      }
 
       return ok(
         users.map((u) => ({
@@ -135,6 +153,16 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
         })),
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
+    }
+  },
+  getDrillDetail: async (drillId) => {
+    try {
+      const drill = await prisma.drill.findUnique({
+        where: { id: drillId },
+      });
+      return ok(drill);
     } catch (e: any) {
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
     }
@@ -176,8 +204,20 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
       await prisma.$transaction(async (tx) => {
         for (const target of targets) {
           if ((channel === 'email' || channel === 'both') && target.email) {
-            const recipient = await tx.drillRecipient.create({
-              data: {
+            const recipient = await tx.drillRecipient.upsert({
+              where: {
+                drillId_userId_deliveryChannelId: {
+                  drillId,
+                  userId: target.userId,
+                  deliveryChannelId: emailChannelId,
+                },
+              },
+              update: {
+                deliveryStatus: 'pending',
+                deliveryError: null,
+                deliveredAt: null,
+              },
+              create: {
                 drillId,
                 userId: target.userId,
                 deliveryChannelId: emailChannelId,
@@ -206,8 +246,20 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
           }
 
           if ((channel === 'slack' || channel === 'both') && target.slackUserId) {
-            const recipient = await tx.drillRecipient.create({
-              data: {
+            const recipient = await tx.drillRecipient.upsert({
+              where: {
+                drillId_userId_deliveryChannelId: {
+                  drillId,
+                  userId: target.userId,
+                  deliveryChannelId: slackChannelId,
+                },
+              },
+              update: {
+                deliveryStatus: 'pending',
+                deliveryError: null,
+                deliveredAt: null,
+              },
+              create: {
                 drillId,
                 userId: target.userId,
                 deliveryChannelId: slackChannelId,

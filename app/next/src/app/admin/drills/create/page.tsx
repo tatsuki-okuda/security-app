@@ -1,11 +1,16 @@
+import { createContainer } from '../../../../_di/container.server';
 import { CreateDrillForm } from '../../../../features/drill/_ui/CreateDrillForm';
 import { scenarios } from '../../../../features/drill/domain/scenarios';
 
 import { createDrillAction } from './actions';
 
-export default function Page() {
+export default async function Page() {
+  const c = createContainer();
+  const usersRes = await c.admin.usecases.listUsers();
+  const users = usersRes.ok ? usersRes.value : [];
+
   return (
-    <main className="mx-auto mt-12 max-w-3xl space-y-6 px-4 sm:px-0">
+    <main className="mx-auto mt-12 max-w-3xl space-y-6 px-4 sm:px-0 mb-12">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-text-primary">訓練作成</h1>
         <p className="text-sm text-text-secondary">
@@ -13,7 +18,7 @@ export default function Page() {
         </p>
       </header>
 
-      <CreateDrillForm action={createDrillAction} scenarios={scenarios} />
+      <CreateDrillForm action={createDrillAction} scenarios={scenarios} users={users} />
     </main>
   );
 }

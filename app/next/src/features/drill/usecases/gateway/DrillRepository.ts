@@ -23,6 +23,9 @@ export type DrillRepository = {
     title: string;
     scenarioType: string;
     channel: string;
+    targetType: 'all' | 'specific' | 'random';
+    targetCount?: number | null;
+    targetUserIds?: string[] | null;
     subject: string;
     body: string;
     guidanceText: string;
@@ -31,13 +34,22 @@ export type DrillRepository = {
   }) => Promise<Result<{ drillId: string }, DrillRepoError>>;
   updateDrillWithQuiz: (input: {
     drillId: string;
+    channel: string;
+    targetType: 'all' | 'specific' | 'random';
+    targetCount?: number | null;
+    targetUserIds?: string[] | null;
     subject: string;
     body: string;
     guidanceText: string;
     status: 'draft' | 'deliverable' | 'delivering' | 'stopped';
     quiz: QuizTemplateQuestion[];
   }) => Promise<Result<void, DrillRepoError>>;
-  listDeliveryTargets: () => Promise<Result<DeliveryTarget[], DrillRepoError>>;
+  listDeliveryTargets: (input: {
+    targetType: 'all' | 'specific' | 'random';
+    targetCount: number | null;
+    targetUserIds: string[] | null;
+  }) => Promise<Result<DeliveryTarget[], DrillRepoError>>;
+  getDrillDetail: (drillId: string) => Promise<Result<any, DrillRepoError>>;
   ensureDeliveryChannels: () => Promise<Result<{ emailChannelId: string; slackChannelId: string }, DrillRepoError>>;
   createRecipientsAndTokens: (input: {
     drillId: string;

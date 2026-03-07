@@ -62,7 +62,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             {drill.status === 'delivering' && <StopDrillButton drillId={drill.id} />}
             {drill.status === 'deliverable' && <StartDrillButton drillId={drill.id} />}
 
-            {drill.status !== 'stopped' && (
+            {drill.status !== 'delivering' && (
               <Link
                 href={`/admin/drills/${drill.id}/edit`}
                 className="inline-flex items-center rounded-xl bg-surface px-4 py-2 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-bg"

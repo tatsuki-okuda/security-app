@@ -110,6 +110,9 @@ erDiagram
 | subject | varchar | not null | メール件名 |
 | body | text | not null | メール本文（HTML/プレーン想定） |
 | guidance_text | text | not null | 誘導文面（ランディング誘導） |
+| target_type | enum(all,specific,random) | @default("all") | 配信対象の種別 |
+| target_count | int | nullable | ランダム選出時の人数 |
+| target_user_ids | jsonb | nullable | 特定個人選出時のIDリスト |
 | scheduled_at | timestamptz | nullable | 予約配信時刻 |
 | sent_at | timestamptz | nullable | 配信完了時刻 |
 | created_by | uuid | FK -> users.id | 作成者 |

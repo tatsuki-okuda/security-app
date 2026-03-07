@@ -10,6 +10,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
   const c = createContainer();
   const result = await c.admin.usecases.getDrillDetail(id);
+  const usersRes = await c.admin.usecases.listUsers();
+  const users = usersRes.ok ? usersRes.value : [];
 
   if (!result.ok || !result.value) {
     notFound();
@@ -21,7 +23,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         ← 詳細へ戻る
       </Link>
       <h1 className="text-2xl font-semibold text-text-primary">訓練・クイズの編集と配信</h1>
-      <EditDrillForm drill={result.value} action={updateDrillAction} />
+      <EditDrillForm drill={result.value} action={updateDrillAction} users={users} />
     </main>
   );
 }

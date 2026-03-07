@@ -11,7 +11,16 @@ export const createSendDrillInteractor =
   async ({ drillId, channel, subject, body, guidanceText, baseUrl }) => {
     await repo.updateDrillStatus({ drillId, status: 'delivering' });
 
-    const targetsResult = await repo.listDeliveryTargets();
+    const drillDetailRes = await repo.getDrillDetail(drillId);
+    if (!drillDetailRes.ok) return err({ type: 'REPO', message: drillDetailRes.error.message });
+    const drill = drillDetailRes.value;
+    if (!drill) return err({ type: 'REPO', message: 'Drill not found' });
+
+    const targetsResult = await repo.listDeliveryTargets({
+      targetType: (drill as any).targetType as 'all' | 'specific' | 'random', // Type cast for now as drillDetail definition might need it
+      targetCount: (drill as any).targetCount,
+      targetUserIds: (drill as any).targetUserIds as string[] | null,
+    });
     if (!targetsResult.ok) {
       return err({ type: 'REPO', message: targetsResult.error.message });
     }
@@ -35,7 +44,14 @@ export const createSendDrillInteractor =
     const deliveryResults = await Promise.all(
       recipientsResult.value.map(async (recipient) => {
         const url = `${baseUrl.replace(/\/$/, '')}/t/${recipient.token}`;
-        const messageBody = `${body}\n\n${guidanceText}\n${url}`;
+
+        const hasPlaceholder = body.includes('{{TRACKING_URL}}') || body.includes('{TRACKING_URL}');
+        const processedBody = body.replace(/\{\{?TRACKING_URL\}?\}/g, url);
+
+        const messageBody = hasPlaceholder
+          ? `${processedBody}\n\n${guidanceText}`
+          : `${processedBody}\n\n${guidanceText}\n${url}`;
+
         const slackText = `${subject}\n${guidanceText}\n${url}`;
 
         if (recipient.channel === 'email' && recipient.email) {
