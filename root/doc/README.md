@@ -37,6 +37,7 @@ doc/
 │   └── style.md（コーディング規約）
 │
 ├── next.md（Next.js / React 実装ガイド）
+├── QA.md ★ 開発時のQ&A・テスト手順
 └── tmp.md（作業メモ・旧ドラフト ※最新版は screenConfiguration 参照）
 ```
 
@@ -111,10 +112,11 @@ doc/
 | [assets/drill-status-flow.png](./assets/drill-status-flow.png) | 訓練ステータス遷移図 | 全員 |
 | [assets/ui-presentation-split.png](./assets/ui-presentation-split.png) | UI/プレゼンテーション分離イメージ | 開発者 |
 
-### 作業メモ / ドラフト
+### Q&A・作業メモ / ドラフト
 
 | ドキュメント | 説明 | 対象者 |
 |-----------|------|--------|
+| [QA.md](./QA.md) | 開発時のQ&A、ローカル環境でのテスト手順など | 開発者 |
 | [tmp.md](./tmp.md) | 画面ドラフト・作業メモ（最新版は screenConfiguration を参照） | 開発者 |
 
 ---
@@ -167,6 +169,7 @@ doc/
 - **セキュリティ・プロンプトインジェクション対策** → features/promptInjectionDefense.md
 - **LLMの使い方** → features/promptStrategy.md
 - **Next.js / React 実装指針** → next.md
+- **技術・仕様での不明点、テスト手順** → QA.md
 - **コーディング規約・命名** → infrastructure/style.md
 - **環境構築** → infrastructure/podman.md
 - **図・ダイアグラム** → assets 配下（architecture-dependency.png / drill-status-flow.png / ui-presentation-split.png）
