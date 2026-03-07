@@ -24,6 +24,10 @@ export const createUpdateDrillInteractor = (repo: DrillRepository): UpdateDrillU
 
     const saved = await repo.updateDrillWithQuiz({
       drillId: input.drillId,
+      channel: input.channel,
+      targetType: input.targetType,
+      targetCount: input.targetCount,
+      targetUserIds: input.targetUserIds,
       subject: input.subject,
       body: input.body,
       guidanceText: input.guidanceText,

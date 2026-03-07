@@ -4,6 +4,9 @@ export const updateDrillSchema = z
   .object({
     drillId: z.string().min(1),
     channel: z.enum(['email', 'slack', 'both']),
+    targetType: z.enum(['all', 'specific', 'random']).default('all'),
+    targetCount: z.number().nullable().optional(),
+    targetUserIds: z.string().nullable().optional(), // Expected to be serialized JSON string from client
     subject: z.string(),
     body: z.string(),
     guidanceText: z.string(),
@@ -44,6 +47,37 @@ export const updateDrillSchema = z
           message: 'クイズ問題を入力するかAI生成してください',
           path: ['quizQuestions'],
         });
+      }
+
+      // Add Target Type Validations
+      if (data.targetType === 'random' && (!data.targetCount || data.targetCount <= 0)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'ランダム選出の人数を正しく入力してください',
+          path: ['targetCount'],
+        });
+      }
+
+      if (data.targetType === 'specific') {
+        let parsedUserIds: string[] = [];
+        if (data.targetUserIds) {
+          try {
+            parsedUserIds = JSON.parse(data.targetUserIds);
+          } catch {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: '対象ユーザーリストの形式が不正です',
+              path: ['targetUserIds'],
+            });
+          }
+        }
+        if (parsedUserIds.length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: '特定の個人を1人以上選択してください',
+            path: ['targetUserIds'],
+          });
+        }
       }
     }
   });

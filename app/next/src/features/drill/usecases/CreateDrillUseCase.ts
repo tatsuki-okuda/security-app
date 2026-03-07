@@ -11,6 +11,9 @@ export type CreateDrillUseCase = (input: {
   title: string;
   scenarioType: string;
   channel: string;
+  targetType: 'all' | 'specific' | 'random';
+  targetCount?: number | null;
+  targetUserIds?: string[] | null;
   subject: string;
   body: string;
   guidanceText: string;

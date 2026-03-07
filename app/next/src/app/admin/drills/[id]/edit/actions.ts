@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { createContainer } from '../../../../../_di/container.server';
@@ -14,6 +15,9 @@ export const updateDrillAction = async (
   const raw = {
     drillId: String(formData.get('drillId') ?? ''),
     channel: String(formData.get('channel') ?? ''),
+    targetType: String(formData.get('targetType') ?? 'all'),
+    targetCount: formData.get('targetCount') ? Number(formData.get('targetCount')) : null,
+    targetUserIds: String(formData.get('targetUserIds') ?? ''),
     subject: String(formData.get('subject') ?? ''),
     body: String(formData.get('body') ?? ''),
     guidanceText: String(formData.get('guidanceText') ?? ''),
@@ -30,6 +34,10 @@ export const updateDrillAction = async (
   const c = createContainer();
   const updated = await c.drill.usecases.update({
     drillId: parsed.data.drillId,
+    channel: parsed.data.channel,
+    targetType: parsed.data.targetType as 'all' | 'specific' | 'random',
+    targetCount: parsed.data.targetCount,
+    targetUserIds: parsed.data.targetUserIds ? JSON.parse(parsed.data.targetUserIds) : [],
     subject: parsed.data.subject,
     body: parsed.data.body,
     guidanceText: parsed.data.guidanceText,
@@ -60,5 +68,7 @@ export const updateDrillAction = async (
     }
   }
 
+  revalidatePath(`/admin/drills/${parsed.data.drillId}`);
+  revalidatePath(`/admin/drills`);
   redirect(`/admin/drills/${parsed.data.drillId}`);
 };

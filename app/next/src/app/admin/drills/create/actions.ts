@@ -15,6 +15,9 @@ export const createDrillAction = async (
     title: String(formData.get('title') ?? ''),
     scenarioType: String(formData.get('scenarioType') ?? ''),
     channel: String(formData.get('channel') ?? ''),
+    targetType: String(formData.get('targetType') ?? 'all'),
+    targetCount: formData.get('targetCount') ? Number(formData.get('targetCount')) : null,
+    targetUserIds: String(formData.get('targetUserIds') ?? ''),
     subject: String(formData.get('subject') ?? ''),
     body: String(formData.get('body') ?? ''),
     guidanceText: String(formData.get('guidanceText') ?? ''),
@@ -30,8 +33,10 @@ export const createDrillAction = async (
   const c = createContainer();
   const created = await c.drill.usecases.create({
     ...parsed.data,
+    targetType: parsed.data.targetType as 'all' | 'specific' | 'random',
+    targetUserIds: parsed.data.targetUserIds ? JSON.parse(parsed.data.targetUserIds) : [],
     quiz: undefined,
-    status: parsed.data.actionType,
+    status: parsed.data.actionType as 'draft' | 'deliverable' | 'delivering',
   });
 
   if (!created.ok) {

@@ -10,18 +10,23 @@ import { MAX_USER_PROMPT_LENGTH } from '../../llm/domain/userPromptValidation';
 
 import type { CreateDrillActionState } from '../contracts/createDrill';
 import type { Scenario } from '../domain/scenarios';
+import type { UserListItem } from '../../admin/usecases/gateway/AdminRepository';
 
 type Props = {
   action: (prev: CreateDrillActionState, formData: FormData) => Promise<CreateDrillActionState>;
   scenarios: Scenario[];
+  users: UserListItem[];
 };
 
 const initialState: CreateDrillActionState = { status: 'idle' };
 
-export const CreateDrillForm = ({ action, scenarios }: Props) => {
+export const CreateDrillForm = ({ action, scenarios, users }: Props) => {
   const [state, formAction, isPending] = useActionState(action, initialState);
   const fieldErrors = state.status === 'error' ? (state.fieldErrors ?? {}) : {};
 
+  const [targetType, setTargetType] = useState<'all' | 'specific' | 'random'>('all');
+  const [targetCount, setTargetCount] = useState<number | ''>('');
+  const [targetUserIds, setTargetUserIds] = useState<string[]>([]);
   const [scenarioType, setScenarioType] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
@@ -116,6 +121,107 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
               <option value="both">メール + Slack</option>
             </select>
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-text-primary mb-4">配信対象</h2>
+        <div className="space-y-4">
+          <input type="hidden" name="targetUserIds" value={JSON.stringify(targetUserIds)} />
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-text-primary">対象者</label>
+            <div className="flex flex-wrap items-center gap-6 mt-1">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="targetType"
+                  value="all"
+                  checked={targetType === 'all'}
+                  onChange={() => setTargetType('all')}
+                  className="w-4 h-4 text-emerald-600 border-border focus:ring-emerald-600"
+                />
+                全員に送信
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="targetType"
+                  value="specific"
+                  checked={targetType === 'specific'}
+                  onChange={() => setTargetType('specific')}
+                  className="w-4 h-4 text-emerald-600 border-border focus:ring-emerald-600"
+                />
+                特定の個人
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="targetType"
+                  value="random"
+                  checked={targetType === 'random'}
+                  onChange={() => setTargetType('random')}
+                  className="w-4 h-4 text-emerald-600 border-border focus:ring-emerald-600"
+                />
+                ランダム選出
+              </label>
+            </div>
+            {fieldErrors.targetType?.map((msg) => (
+              <p key={msg} className="text-xs text-error">{msg}</p>
+            ))}
+          </div>
+
+          {targetType === 'specific' && (
+            <div className="space-y-3 pl-6 border-l-2 border-slate-200 py-1">
+              <label className="text-sm font-semibold text-text-primary">
+                対象ユーザー ({targetUserIds.length}名選択中)
+              </label>
+              <div className="max-h-48 overflow-y-auto rounded-xl border border-border p-3 space-y-2">
+                {users?.map((user) => (
+                  <label key={user.id} className="flex items-center gap-3 text-sm cursor-pointer hover:bg-slate-50/10 p-1 rounded transition-colors border border-transparent hover:border-border/50">
+                    <input
+                      type="checkbox"
+                      checked={targetUserIds.includes(user.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setTargetUserIds([...targetUserIds, user.id]);
+                        } else {
+                          setTargetUserIds(targetUserIds.filter(id => id !== user.id));
+                        }
+                      }}
+                      className="rounded border-border text-emerald-600 focus:ring-emerald-600"
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-text-secondary">{user.email}</span>
+                      {user.role === 'admin' && <span className="text-xs text-blue-500">管理者</span>}
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {fieldErrors.targetUserIds?.map((msg) => (
+                <p key={msg} className="text-xs text-error">{msg}</p>
+              ))}
+            </div>
+          )}
+
+          {targetType === 'random' && (
+            <div className="space-y-2 pl-6 border-l-2 border-slate-200 py-1">
+              <label className="text-sm font-semibold text-text-primary">ランダム選出する人数</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  name="targetCount"
+                  min="1"
+                  value={targetCount}
+                  onChange={(e) => setTargetCount(e.target.value ? Number(e.target.value) : '')}
+                  className="w-24 rounded-xl border border-border px-4 py-2 text-sm text-right"
+                />
+                <span className="text-sm text-text-secondary">人</span>
+              </div>
+              {fieldErrors.targetCount?.map((msg) => (
+                <p key={msg} className="text-xs text-error">{msg}</p>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
