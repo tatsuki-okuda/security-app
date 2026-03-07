@@ -9,12 +9,8 @@ export const generateContentAction = async (
   _prev: GenerateContentActionState,
   formData: FormData,
 ): Promise<GenerateContentActionState> => {
-  const scenarioType = String(formData.get('scenarioType') ?? '');
+  const scenarioType = String(formData.get('scenarioType') ?? '') || 'custom';
   const rawUserPrompt = formData.get('userPrompt') ? String(formData.get('userPrompt')) : '';
-
-  if (!scenarioType) {
-    return { status: 'error', formError: 'シナリオを選択してください' };
-  }
 
   const validation = validateUserPrompt(rawUserPrompt);
   if (!validation.ok) {

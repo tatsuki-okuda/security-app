@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { createContainer } from '../../../../_di/container.server';
+import { StartDrillButton } from '../../../../features/drill/_ui/components/StartDrillButton';
 import { StopDrillButton } from '../../../../features/drill/_ui/components/StopDrillButton';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -59,6 +60,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
           <div className="flex items-center gap-3">
             {drill.status === 'delivering' && <StopDrillButton drillId={drill.id} />}
+            {drill.status === 'deliverable' && <StartDrillButton drillId={drill.id} />}
 
             {drill.status !== 'stopped' && (
               <Link

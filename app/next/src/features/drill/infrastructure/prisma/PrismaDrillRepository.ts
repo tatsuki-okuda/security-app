@@ -66,7 +66,20 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
           },
         });
 
-        // 既存のクイズをすべて削除（オプションは連携削除設定されている想定だが、ORM上で一括削除）
+        // 既存のクイズをすべて削除（オプションは連携削除設定されていないため明示的に削除する）
+        const existingQuestions = await tx.quizQuestion.findMany({
+          where: { drillId },
+          select: { id: true },
+        });
+
+        if (existingQuestions.length > 0) {
+          await tx.quizOption.deleteMany({
+            where: {
+              questionId: { in: existingQuestions.map((q) => q.id) },
+            },
+          });
+        }
+
         await tx.quizQuestion.deleteMany({
           where: { drillId },
         });

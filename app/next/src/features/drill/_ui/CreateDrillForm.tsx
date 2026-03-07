@@ -1,12 +1,12 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useCallback } from 'react';
 
 import { generateContentAction } from '../../../app/admin/drills/create/generateContentAction';
 import { reviseContentAction } from '../../../app/admin/drills/create/reviseContentAction';
-import { MAX_USER_PROMPT_LENGTH } from '../../llm/domain/userPromptValidation';
 import { AiGenerateButton } from '../../llm/_ui/AiGenerateButton';
 import { AiReviseButton } from '../../llm/_ui/AiReviseButton';
+import { MAX_USER_PROMPT_LENGTH } from '../../llm/domain/userPromptValidation';
 
 import type { CreateDrillActionState } from '../contracts/createDrill';
 import type { Scenario } from '../domain/scenarios';
@@ -35,7 +35,7 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
   const [bodyQualityWarning, setBodyQualityWarning] = useState('');
   const [generateError, setGenerateError] = useState<string | null>(null);
 
-  const handleAiGenerated = (data: {
+  const handleAiGenerated = useCallback((data: {
     subject: string;
     body: string;
     guidanceText: string;
@@ -52,9 +52,9 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setRiskNotes(data.riskNotes);
     setBodyQualityWarning(data.bodyQualityWarning ?? '');
     setEditPrompt(''); // 生成し直した場合は編集プロンプトをクリア
-  };
+  }, []);
 
-  const handleAiRevised = (data: {
+  const handleAiRevised = useCallback((data: {
     subject: string;
     body: string;
     guidanceText: string;
@@ -70,7 +70,7 @@ export const CreateDrillForm = ({ action, scenarios }: Props) => {
     setRiskNotes(data.riskNotes);
     setBodyQualityWarning(''); // 再編集後は警告をクリア
     setEditPrompt(''); // 完了後にプロンプトをクリア
-  };
+  }, []);
 
   return (
     <form action={formAction} className="space-y-6">

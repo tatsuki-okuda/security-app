@@ -157,7 +157,23 @@ ${userPrompt}
 {existingQuestionsContext}
 
 【出力形式の厳守】
-必ず以下のフォーマット指示に従い有効なJSONを出力してください。
+ただひとつの有効なJSONオブジェクトのみを出力してください。Markdownのコードブロック（\`\`\`jsonなど）は不要です。
+最上位（ルート）にはこれら5つのキー（"order", "questionType", "questionText", "explanation", "options"）のみを必ず持たせてください。"question"のような余計なキーで全体をネスト（入れ子）にしないでください。
+"options" は配列とし、各要素は必ず "label", "optionText", "isCorrect" の3つのキーを持つオブジェクトにしてください。途中で出力を中断せず、最後まで正しいJSON形式として完了させてください。
+
+【出力例（このキー構成・構造を絶対に変更しないでください）】
+{{
+  "order": 1,
+  "questionType": "multiple_choice",
+  "questionText": "パスワード管理として適切なものをすべて選んでください。",
+  "explanation": "パスワードは使い回さず、2要素認証を併用することが推奨されます。",
+  "options": [
+    {{ "label": "1", "optionText": "サービスごとに異なるパスワードを設定する", "isCorrect": true }},
+    {{ "label": "2", "optionText": "覚えやすいように1つの複雑なパスワードを使い回す", "isCorrect": false }},
+    {{ "label": "3", "optionText": "可能であれば2要素認証(2FA)を有効化する", "isCorrect": true }}
+  ]
+}}
+
 {{format_instructions}}
 
 {userPromptInstructions}

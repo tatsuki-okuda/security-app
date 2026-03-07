@@ -1,12 +1,15 @@
 'use client';
 
-import { Plus, Trash2 } from 'lucide-react';
-import { useActionState, useState } from 'react';
+import { Plus, Trash2, Sparkles, Bot, Send } from 'lucide-react';
+import { useActionState, useState, useCallback } from 'react';
 
+import { generateContentAction } from '../../../app/admin/drills/create/generateContentAction';
 import { generateQuizAction } from '../../../app/admin/drills/create/generateQuizAction';
 import { reviseContentAction } from '../../../app/admin/drills/create/reviseContentAction';
+import { AiGenerateButton } from '../../llm/_ui/AiGenerateButton';
 import { AiGenerateQuizButton } from '../../llm/_ui/AiGenerateQuizButton';
 import { AiReviseButton } from '../../llm/_ui/AiReviseButton';
+import { MAX_USER_PROMPT_LENGTH } from '../../llm/domain/userPromptValidation';
 
 import type { DrillDetail } from '../../admin/usecases/gateway/AdminRepository';
 import type { UpdateDrillActionState } from '../contracts/updateDrill';
@@ -29,7 +32,10 @@ export const EditDrillForm = ({ drill, action }: Props) => {
   const [guidanceText, setGuidanceText] = useState(drill.guidanceText);
 
   // We only keep basic email fields, since riskNotes etc are not updating in DrillUseCase
+  const [userPrompt, setUserPrompt] = useState('');
   const [editPrompt, setEditPrompt] = useState('');
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [bodyQualityWarning, setBodyQualityWarning] = useState('');
   
   const [quizQuestions, setQuizQuestions] = useState<QuizTemplateQuestion[]>(
     drill.quizQuestions.map((q, idx) => ({
@@ -41,7 +47,23 @@ export const EditDrillForm = ({ drill, action }: Props) => {
     }))
   );
 
-  const handleAiRevised = (data: {
+  const handleAiGenerated = useCallback((data: {
+    subject: string;
+    body: string;
+    guidanceText: string;
+    ctaText: string;
+    ctaUrlPlaceholder: string;
+    riskNotes: string;
+    bodyQualityWarning?: string;
+  }) => {
+    setSubject(data.subject);
+    setBody(data.body);
+    setGuidanceText(data.guidanceText);
+    setBodyQualityWarning(data.bodyQualityWarning ?? '');
+    setEditPrompt('');
+  }, []);
+
+  const handleAiRevised = useCallback((data: {
     subject: string;
     body: string;
     guidanceText: string;
@@ -49,12 +71,20 @@ export const EditDrillForm = ({ drill, action }: Props) => {
     setSubject(data.subject);
     setBody(data.body);
     setGuidanceText(data.guidanceText);
+    setBodyQualityWarning('');
     setEditPrompt('');
-  };
+  }, []);
 
-  const handleQuizGenerated = (data: { quiz: QuizTemplateQuestion[] }) => {
-    setQuizQuestions((prev) => [...prev, ...data.quiz]);
-  };
+  const handleQuizGenerated = useCallback((data: { quiz: QuizTemplateQuestion[] }) => {
+    setQuizQuestions((prev) => {
+      // Avoid adding exact duplicates if the previous state already generated them
+      const newQuestions = data.quiz.filter(
+        (q) => !prev.some((p) => p.questionText === q.questionText)
+      );
+      if (newQuestions.length === 0) return prev;
+      return [...prev, ...newQuestions];
+    });
+  }, []);
 
   const removeQuiz = (index: number) => {
     setQuizQuestions((prev) => prev.filter((_, i) => i !== index));
@@ -82,10 +112,47 @@ export const EditDrillForm = ({ drill, action }: Props) => {
     setQuizQuestions(newArr);
   };
 
+  const actionButtons = (
+    <div className="flex items-center justify-end gap-3">
+      <button
+        type="submit"
+        name="actionType"
+        value="draft"
+        disabled={isPending}
+        className="inline-flex items-center rounded-xl bg-surface px-5 py-3 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-bg disabled:opacity-70"
+      >
+        保存
+      </button>
+      <button
+        type="submit"
+        name="actionType"
+        value="deliverable"
+        disabled={isPending}
+        className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 disabled:opacity-70"
+      >
+        配信準備
+      </button>
+      <button
+        type="submit"
+        name="actionType"
+        value="delivering"
+        disabled={isPending || drill.status !== 'deliverable'}
+        className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        <Send className="h-4 w-4" />
+        配信する
+      </button>
+    </div>
+  );
+
   return (
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="drillId" value={drill.id} />
       <input type="hidden" name="quizQuestions" value={JSON.stringify(quizQuestions)} />
+
+      {/* 画面上部の操作ボタン群 */}
+      {actionButtons}
+
 
       <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-text-primary mb-4">訓練基本情報</h2>
@@ -108,8 +175,53 @@ export const EditDrillForm = ({ drill, action }: Props) => {
       </section>
 
       <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">メール文面の編集</h2>
         <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-2">
+              <h2 className="text-lg font-semibold text-text-primary">メール文面</h2>
+              <textarea
+                value={userPrompt}
+                onChange={(e) => {
+                  setUserPrompt(e.target.value);
+                  setGenerateError(null);
+                }}
+                placeholder="AIへの追加指示（例: もっと緊急性を煽って、社長になりすまして 等）"
+                rows={2}
+                maxLength={MAX_USER_PROMPT_LENGTH}
+                className="w-full rounded-xl border border-border px-4 py-2 text-sm text-text-secondary bg-surface"
+                aria-describedby="user-prompt-hint"
+                aria-invalid={!!generateError}
+                aria-errormessage={generateError ? 'generate-error' : undefined}
+              />
+              <p id="user-prompt-hint" className="text-xs text-text-secondary">
+                {MAX_USER_PROMPT_LENGTH}文字以内。差出人・トーン・文体などのスタイル指示のみ入力してください。生成後に本文に不適切な表現が含まれていると警告が表示されます。
+              </p>
+              {generateError && (
+                <p id="generate-error" role="alert" className="text-xs text-error">
+                  {generateError}
+                </p>
+              )}
+            </div>
+            <div className="pt-8">
+              <AiGenerateButton
+                action={generateContentAction}
+                scenarioType={drill.scenarioId ?? ''}
+                userPrompt={userPrompt}
+                onGenerated={handleAiGenerated}
+                onError={setGenerateError}
+              />
+            </div>
+          </div>
+
+          {bodyQualityWarning && (
+            <div
+              role="alert"
+              className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            >
+              {bodyQualityWarning}
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="text-sm font-semibold text-text-primary">件名</label>
             <input
@@ -188,26 +300,42 @@ export const EditDrillForm = ({ drill, action }: Props) => {
       <section className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-text-primary mb-4">クイズの作成・編集</h2>
         
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-text-secondary">
-            訓練メール本文に基づいたクイズ問題を作成します。AIで1問ずつ自動生成することもできます。
-          </p>
-          <div className="flex gap-2">
+        <div className="mb-6 space-y-4">
+          <div className="flex items-start gap-3">
             <button
               type="button"
               onClick={addManualQuiz}
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-primary shadow-sm hover:bg-bg transition"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-bg transition"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-text-secondary" />
               手動で追加
             </button>
             <AiGenerateQuizButton
               action={generateQuizAction}
+              questionCount={1}
+              label="AIで1問追加"
+              loadingLabel="生成中..."
+              icon={<Sparkles className="h-4 w-4 text-indigo-400" />}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-bg transition disabled:opacity-50"
+              scenarioType={drill.scenarioId ?? ''}
+              emailBody={body}
+              onGenerated={handleQuizGenerated}
+            />
+            <AiGenerateQuizButton
+              action={generateQuizAction}
+              questionCount={3}
+              label="クイズをAI一括生成"
+              loadingLabel="生成中..."
+              icon={<Bot className="h-4 w-4 text-green-500" />}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-bg transition disabled:opacity-50"
               scenarioType={drill.scenarioId ?? ''}
               emailBody={body}
               onGenerated={handleQuizGenerated}
             />
           </div>
+          <p className="text-sm text-text-secondary">
+            訓練メール本文に基づいたクイズ問題を作成します。AIで1問ずつ自動生成することもできます。
+          </p>
         </div>
 
         {fieldErrors.quizQuestions?.map((msg) => (
@@ -299,34 +427,9 @@ export const EditDrillForm = ({ drill, action }: Props) => {
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-3 pt-4">
-        <button
-          type="submit"
-          name="actionType"
-          value="draft"
-          disabled={isPending}
-          className="inline-flex items-center rounded-xl bg-surface px-5 py-3 text-sm font-semibold text-text-primary shadow-sm ring-1 ring-inset ring-slate-300 transition hover:bg-bg disabled:opacity-70"
-        >
-          下書きとして再度保存
-        </button>
-        <button
-          type="submit"
-          name="actionType"
-          value="deliverable"
-          disabled={isPending}
-          className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 disabled:opacity-70"
-        >
-          配信可能（準備完了）にする
-        </button>
-        <button
-          type="submit"
-          name="actionType"
-          value="delivering"
-          disabled={isPending}
-          className="inline-flex items-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-70"
-        >
-          すぐに配信を開始する
-        </button>
+      {/* 画面下部の操作ボタン群 */}
+      <div className="pt-4 border-t border-border mt-8">
+        {actionButtons}
       </div>
     </form>
   );
