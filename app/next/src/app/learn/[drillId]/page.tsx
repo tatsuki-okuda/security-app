@@ -3,13 +3,13 @@ import { redirect } from 'next/navigation';
 import { createContainer } from '../../../_di/container.server';
 import { LearningIntroView } from '../../../features/learning/_ui';
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { drillId: string };
-  searchParams?: { token?: string };
+export default async function Page(props: {
+  params: Promise<{ drillId: string }>;
+  searchParams?: Promise<{ token?: string }>;
 }) {
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+  
   const { drillId } = params;
   const c = createContainer();
   const result = await c.learning.usecases.getIntro({ drillId });

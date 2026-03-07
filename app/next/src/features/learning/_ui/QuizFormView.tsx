@@ -28,7 +28,7 @@ export const QuizFormView = ({ questions, action, state, token, drillId, isPendi
         return (
           <section key={question.id} className="rounded-2xl border border-border bg-surface/80 p-6 shadow-sm">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Question {question.order}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Question {question.order + 1}</p>
               <h2 className="text-lg font-semibold text-text-primary">{question.questionText}</h2>
             </div>
 
