@@ -65,4 +65,13 @@ export type LlmGateway = {
       LlmGatewayError
     >
   >;
+  judgeUserPrompt: (input: { userPrompt: string }) => Promise<
+    Result<
+      {
+        isStyleOnly: boolean;
+        reason: string;
+      },
+      LlmGatewayError
+    >
+  >;
 };

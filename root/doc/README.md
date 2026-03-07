@@ -60,6 +60,12 @@ doc/
 | [drills/drillStatusFlow.md](./drills/drillStatusFlow.md) | 訓練のステータス遷移、各ステータスでの操作 | 開発者・PM |
 | [drills/quizSpecification.md](./drills/quizSpecification.md) | クイズデータ構造・採点ロジック・将来展開 | 開発者 |
 
+### セキュリティ（Security）
+
+| ドキュメント | 説明 | 対象者 |
+|-----------|------|--------|
+| [features/promptInjectionDefense.md](./features/promptInjectionDefense.md) | プロンプトインジェクション対策等のLLMセキュリティ仕様・実装方針 | 全員 |
+
 ### 実装ガイド / ベストプラクティス
 
 | ドキュメント | 説明 | 対象者 |
@@ -130,8 +136,9 @@ doc/
 4. [architecture.md](./architecture.md) - 設計思想・依存関係を確認
 5. [next.md](./next.md) - Next.js / React 実装ガイドラインを遵守
 6. [features/promptStrategy.md](./features/promptStrategy.md) - LLM/プロンプト周りを実装する場合
-7. [infrastructure/podman.md](./infrastructure/podman.md) - ローカルLLM環境構築
-8. [infrastructure/style.md](./infrastructure/style.md) - コーディング規約・命名
+7. [features/promptInjectionDefense.md](./features/promptInjectionDefense.md) - セキュリティ・脆弱性対策（LLMプロンプトインジェクション防護）の仕様を確認（LLM機能の実装時は必読）
+8. [infrastructure/podman.md](./infrastructure/podman.md) - ローカルLLM環境構築
+9. [infrastructure/style.md](./infrastructure/style.md) - コーディング規約・命名
 
 ### PM・企画の方
 
@@ -157,6 +164,7 @@ doc/
 ドキュメント種別ごとの責務：
 - **画面・遷移について** → screenConfiguration.md / drills/drillStatusFlow.md
 - **データ構造・ロジック（DB/ER/インデックス含む）** → database.md / drills/quizSpecification.md / architecture.md
+- **セキュリティ・プロンプトインジェクション対策** → features/promptInjectionDefense.md
 - **LLMの使い方** → features/promptStrategy.md
 - **Next.js / React 実装指針** → next.md
 - **コーディング規約・命名** → infrastructure/style.md

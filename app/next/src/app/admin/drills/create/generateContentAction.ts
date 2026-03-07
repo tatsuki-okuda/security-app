@@ -23,6 +23,22 @@ export const generateContentAction = async (
   const userPrompt = validation.sanitized || undefined;
 
   const c = createContainer();
+
+  // 第2層: LLMによる意図判定（スタイル指定のみかどうかのチェック）
+  if (userPrompt) {
+    const judgeResult = await c.llm.usecases.judgeUserPrompt({ userPrompt });
+    if (!judgeResult.ok) {
+      return { status: 'error', formError: 'システムエラー: 入力の検証に失敗しました。' };
+    }
+    if (!judgeResult.value.isStyleOnly) {
+      // インジェクションまたは意図しない指示が含まれる場合はブロック
+      return { 
+        status: 'error', 
+        formError: '追加指示に許可されていない表現、または意図しない形式が含まれています。文体の指定のみを入力してください。' 
+      };
+    }
+  }
+
   const result = await c.llm.usecases.generateContent({ scenarioType, userPrompt });
 
   if (!result.ok) {
