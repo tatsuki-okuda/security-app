@@ -12,10 +12,9 @@ export const generateQuizAction = async (
   const scenarioType = String(formData.get('scenarioType') ?? '');
   const emailBody = String(formData.get('emailBody') ?? '');
   const rawUserPrompt = formData.get('userPrompt') ? String(formData.get('userPrompt')) : '';
+  const questionCountStr = formData.get('questionCount');
+  const questionCount = questionCountStr ? parseInt(String(questionCountStr), 10) : 3;
 
-  if (!scenarioType) {
-    return { status: 'error', formError: 'シナリオを選択してください' };
-  }
   if (!emailBody) {
     return { status: 'error', formError: 'メール本文が必要です' };
   }
@@ -43,7 +42,7 @@ export const generateQuizAction = async (
     }
   }
 
-  const result = await c.llm.usecases.generateQuiz({ scenarioType, emailBody, userPrompt });
+  const result = await c.llm.usecases.generateQuiz({ scenarioType, emailBody, userPrompt, questionCount });
 
   if (!result.ok) {
     return { status: 'error', formError: result.error.message };
