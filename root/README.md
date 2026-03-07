@@ -145,8 +145,8 @@ Prismaの各種操作は、Dockerコンテナ内から直接実行する方法�
 
 - **コンテナ内から実行:**
   ```bash
-  # モデル（例: llama3）のPullが必要な場合
-  npx podman exec -it <ollamaコンテナ名> ollama pull llama3
+  # モデル（例: qwen2.5）のPullが必要な場合 (Macホストのターミナルで実行)
+  ollama pull qwen2.5
   ```
 - オフライン動作やOllamaの詳細な検証環境構築手順については [doc/infrastructure/ollama.md](./doc/infrastructure/ollama.md) を参照。
 

@@ -53,6 +53,53 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
       return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
     }
   },
+  updateDrillWithQuiz: async ({ drillId, subject, body, guidanceText, status, quiz }) => {
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.drill.update({
+          where: { id: drillId },
+          data: {
+            status,
+            subject,
+            body,
+            guidanceText,
+          },
+        });
+
+        // 既存のクイズをすべて削除（オプションは連携削除設定されている想定だが、ORM上で一括削除）
+        await tx.quizQuestion.deleteMany({
+          where: { drillId },
+        });
+
+        for (const question of quiz) {
+          const createdQuestion = await tx.quizQuestion.create({
+            data: {
+              drillId,
+              order: question.order,
+              questionType: question.questionType,
+              questionText: question.questionText,
+              explanation: question.explanation,
+            },
+            select: { id: true },
+          });
+
+          await tx.quizOption.createMany({
+            data: question.options.map((option) => ({
+              questionId: createdQuestion.id,
+              label: option.label,
+              optionText: option.optionText,
+              isCorrect: option.isCorrect,
+            })),
+          });
+        }
+      });
+
+      return ok(undefined);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return err({ type: 'DB', message: e?.message ?? 'DBエラーが発生しました' });
+    }
+  },
   listDeliveryTargets: async () => {
     try {
       const users = await prisma.user.findMany({

@@ -30,7 +30,7 @@ export const createDrillAction = async (
   const c = createContainer();
   const created = await c.drill.usecases.create({
     ...parsed.data,
-    quiz: parsed.data.quizQuestions ? JSON.parse(parsed.data.quizQuestions) : undefined,
+    quiz: undefined,
     status: parsed.data.actionType,
   });
 
@@ -41,22 +41,5 @@ export const createDrillAction = async (
     return { status: 'error', formError: created.error.message };
   }
 
-  // 即時配信が選ばれた場合のみ配信処理を実行
-  if (parsed.data.actionType === 'delivering') {
-    const baseUrl = process.env.APP_BASE_URL ?? 'http://localhost:3000';
-    const sendResult = await c.drill.usecases.send({
-      drillId: created.value.drillId,
-      channel: parsed.data.channel,
-      subject: parsed.data.subject,
-      body: parsed.data.body,
-      guidanceText: parsed.data.guidanceText,
-      baseUrl,
-    });
-
-    if (!sendResult.ok) {
-      return { status: 'error', formError: sendResult.error.message };
-    }
-  }
-
-  redirect(`/admin/drills/${created.value.drillId}`);
+  redirect(`/admin/drills/${created.value.drillId}/edit`);
 };

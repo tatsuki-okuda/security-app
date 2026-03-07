@@ -1,6 +1,7 @@
-import { ReactNode } from 'react';
-import { AdminSidebar } from './AdminSidebar';
 import { Bell, User } from 'lucide-react';
+import { ReactNode } from 'react';
+
+import { AdminSidebar } from './AdminSidebar';
 
 export function AdminLayoutShell({ children, logoutAction }: { children: ReactNode; logoutAction: ReactNode }) {
   return (

@@ -1,5 +1,7 @@
 import { err, ok } from '../../../shared/fp/result';
 
+import { findForbiddenPhrasesInBody } from '../domain/forbiddenBodyPhrases';
+
 import type { LlmGateway } from './gateway/LlmGateway';
 import type { Result } from '../../../shared/fp/result';
 
@@ -15,6 +17,8 @@ export type GenerateContentOutput = {
   ctaUrlPlaceholder: string;
   guidanceText: string;
   riskNotes: string;
+  /** 本文に訓練と分かる表現が含まれていた場合の警告文（運用者向け） */
+  bodyQualityWarning?: string;
 };
 
 export type GenerateContentError = { type: 'LLM_ERROR'; message: string };
@@ -37,5 +41,12 @@ export const createGenerateDrillContentInteractor =
       return err({ type: 'LLM_ERROR', message: result.error.message });
     }
 
-    return ok(result.value);
+    const value = result.value;
+    const forbiddenFound = findForbiddenPhrasesInBody(value.body);
+    const bodyQualityWarning =
+      forbiddenFound.length > 0
+        ? `生成された本文に「${forbiddenFound.join('」「')}」が含まれています。受信者に訓練と悟られないよう、編集するか再生成してください。`
+        : undefined;
+
+    return ok({ ...value, bodyQualityWarning });
   };

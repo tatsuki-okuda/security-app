@@ -185,6 +185,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
         select: {
           id: true,
           title: true,
+          scenarioId: true,
           status: true,
           channel: true,
           subject: true,
@@ -220,6 +221,7 @@ export const createPrismaAdminRepository = (): AdminRepository => ({
       return ok({
         id: drill.id,
         title: drill.title,
+        scenarioId: drill.scenarioId,
         status: drill.status,
         channel: drill.channel,
         subject: drill.subject,

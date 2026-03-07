@@ -157,10 +157,11 @@ pmc build --no-cache
 3. Mailpit UI（`http://localhost:8025`）で受信メールを開き、`/t/[token]` リンク遷移を確認
 
 ### ローカルLLM（Ollama）
-訓練コンテンツのAIによる生成とフィードバック分析をローカル環境で無料で行うため、Ollama のサービスが稼働します。
+訓練コンテンツのAIによる生成とフィードバック分析をローカル環境で無料で行うため、Ollama のサービスを利用します。
 
 - API Endpoint: `http://localhost:11434`
-- コンテナとして提供されるため、追加の設定なくNext.jsアプリケーションと連携します。詳細は [ollama.md](./ollama.md) を参照してください。
+- **重要**: OllamaはDocker/Podmanコンテナ化せず、Macホスト機にネイティブインストールする必要があります（Apple Silicon GPUをフル活用して生成を高速化するため）。
+- 詳細は [ollama.md](./ollama.md) を参照して設定・インストールを行なってください。
 
 ## 動作確認
 

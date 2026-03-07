@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 import { config } from 'dotenv';
+
 config();
 import { createLangchainLlmGateway } from './src/features/llm/infrastructure/langchain/LangchainLlmGateway';
 
