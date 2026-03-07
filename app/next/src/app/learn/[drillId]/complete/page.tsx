@@ -2,13 +2,13 @@ import { redirect } from 'next/navigation';
 
 import { createContainer } from '../../../../_di/container.server';
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { drillId: string };
-  searchParams?: { token?: string };
+export default async function Page(props: {
+  params: Promise<{ drillId: string }>;
+  searchParams?: Promise<{ token?: string }>;
 }) {
+  const params = await props.params;
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+  
   const token = searchParams?.token ?? '';
   if (!token) {
     redirect('/error/invalid-token');
