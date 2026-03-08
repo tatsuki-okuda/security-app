@@ -34,9 +34,9 @@ export const AiGenerateButton = ({ action, scenarioType, userPrompt, onGenerated
 
   useEffect(() => {
     if (onError) {
-      onError(state.status === 'error' && state.formError ? state.formError : null);
+      onError(state.status === 'error' ? (state.formError ?? null) : null);
     }
-  }, [state.status, state.formError, onError]);
+  }, [state, onError]);
 
   const disabled = isPending || !scenarioType;
 
