@@ -31,13 +31,46 @@ export const updateDrillAction = async (
     return { status: 'error', fieldErrors: fe };
   }
 
+  let targetUserIdsArray: string[] = [];
+  try {
+    const rawIds = parsed.data.targetUserIds;
+    if (rawIds) {
+      let current: unknown = rawIds;
+      while (typeof current === 'string' && (current.startsWith('[') || current.startsWith('"'))) {
+        const next = JSON.parse(current);
+        if (current === next) break;
+        current = next;
+      }
+      
+      if (Array.isArray(current)) {
+        targetUserIdsArray = current as string[];
+      } else if (typeof current === 'string') {
+        const cleaned = current
+          .replace(/^"+|"+$/g, '')
+          .replace(/\\"/g, '"')
+          .replace(/\\\\/g, '\\');
+        
+        if (cleaned.startsWith('[')) {
+          targetUserIdsArray = JSON.parse(cleaned);
+        } else if (cleaned.includes(',')) {
+          targetUserIdsArray = cleaned.split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+        } else {
+          targetUserIdsArray = [cleaned.trim().replace(/^"|"$/g, '')].filter(Boolean);
+        }
+      }
+    }
+  } catch {
+    // fallback to empty array if parsing completely fails
+    targetUserIdsArray = [];
+  }
+
   const c = createContainer();
   const updated = await c.drill.usecases.update({
     drillId: parsed.data.drillId,
     channel: parsed.data.channel,
     targetType: parsed.data.targetType as 'all' | 'specific' | 'random',
     targetCount: parsed.data.targetCount,
-    targetUserIds: parsed.data.targetUserIds ? JSON.parse(parsed.data.targetUserIds) : [],
+    targetUserIds: targetUserIdsArray,
     subject: parsed.data.subject,
     body: parsed.data.body,
     guidanceText: parsed.data.guidanceText,

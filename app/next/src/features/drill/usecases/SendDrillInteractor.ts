@@ -22,11 +22,13 @@ export const createSendDrillInteractor =
       targetUserIds: (drill as any).targetUserIds as string[] | null,
     });
     if (!targetsResult.ok) {
+      await repo.updateDrillStatus({ drillId, status: 'failed' });
       return err({ type: 'REPO', message: targetsResult.error.message });
     }
 
     const channelsResult = await repo.ensureDeliveryChannels();
     if (!channelsResult.ok) {
+      await repo.updateDrillStatus({ drillId, status: 'failed' });
       return err({ type: 'REPO', message: channelsResult.error.message });
     }
 
@@ -38,6 +40,7 @@ export const createSendDrillInteractor =
       slackChannelId: channelsResult.value.slackChannelId,
     });
     if (!recipientsResult.ok) {
+      await repo.updateDrillStatus({ drillId, status: 'failed' });
       return err({ type: 'REPO', message: recipientsResult.error.message });
     }
 

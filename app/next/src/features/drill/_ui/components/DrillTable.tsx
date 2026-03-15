@@ -98,7 +98,7 @@ export function DrillTable({ drills }: Props) {
                       {drill.status === 'stopped' && <span className="text-warning">配信停止</span>}
                       {!['draft', 'deliverable', 'delivering', 'sent', 'failed', 'stopped'].includes(drill.status) && <span className="text-text-secondary">{drill.status}</span>}
                     </td>
-                    <td className="px-4 py-3 text-text-secondary text-xs">
+                    <td className="px-4 py-3 text-text-secondary text-xs" suppressHydrationWarning>
                       {drill.sentAt ? new Date(drill.sentAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '未送信'}
                     </td>
                   </tr>
