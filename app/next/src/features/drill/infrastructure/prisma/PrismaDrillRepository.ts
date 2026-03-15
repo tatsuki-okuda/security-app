@@ -73,16 +73,24 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
           },
         });
 
-        // 既存のクイズをすべて削除（オプションは連携削除設定されていないため明示的に削除する）
         const existingQuestions = await tx.quizQuestion.findMany({
           where: { drillId },
           select: { id: true },
         });
 
         if (existingQuestions.length > 0) {
+          const questionIds = existingQuestions.map((q) => q.id);
+
+          // 回答履歴がある場合は関連制約エラーになるため、先に回答内容を削除する
+          await tx.quizAnswer.deleteMany({
+            where: {
+              questionId: { in: questionIds },
+            },
+          });
+
           await tx.quizOption.deleteMany({
             where: {
-              questionId: { in: existingQuestions.map((q) => q.id) },
+              questionId: { in: questionIds },
             },
           });
         }
@@ -127,8 +135,56 @@ export const createPrismaDrillRepository = (): DrillRepository => ({
         optedOut: false,
       };
 
-      if (targetType === 'specific' && targetUserIds && targetUserIds.length > 0) {
-        whereClause.id = { in: targetUserIds };
+      let parsedUserIds: string[] = [];
+      if (Array.isArray(targetUserIds)) {
+        parsedUserIds = targetUserIds;
+      } else if (typeof targetUserIds === 'string') {
+        try {
+          const current: unknown = targetUserIds;
+          // 二重、三重に stringify されたり、エスケープ文字が混入しているケースへの対応
+          let parsedValue: unknown = current;
+          
+          while (typeof parsedValue === 'string') {
+            try {
+              // 単純な parse
+              const nextValue = JSON.parse(parsedValue);
+              if (parsedValue === nextValue) {
+                  break; // 変化がなければ抜ける
+              }
+              parsedValue = nextValue;
+            } catch {
+              // JSON.parse に失敗した場合（余計なエスケープ文字が残っている場合など）
+              // 余分なバックスラッシュや前後についた不要なダブルクォーテーションを綺麗にする
+              const strValue = parsedValue as string;
+              const cleaned = strValue
+                .replace(/^"+|"+$/g, '')          // 前後の " を削除 (e.g. "\"[\"foo\"]\"" -> \[\"foo\"\] )
+                .replace(/\\"/g, '"')             // \" を " に変換
+                .replace(/\\\\/g, '\\');          // \\ を \ に変換
+
+              if (cleaned !== strValue && (cleaned.startsWith('[') || cleaned.startsWith('"'))) {
+                parsedValue = cleaned;
+              } else {
+                 break; // これ以上綺麗にできない・パースできなければ諦める
+              }
+            }
+          }
+
+          if (Array.isArray(parsedValue)) {
+             parsedUserIds = parsedValue as string[];
+          } else if (typeof parsedValue === 'string' && parsedValue.includes(',')) {
+              // 万が一カンマ区切りの文字列になっていた場合のフォールバック
+             parsedUserIds = parsedValue.split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+          } else if (typeof parsedValue === 'string') {
+              // 単一の ID 文字列のフォールバック
+             parsedUserIds = [parsedValue.trim().replace(/^"|"$/g, '')].filter(Boolean);
+          }
+        } catch {
+          // do nothing string parse failed
+        }
+      }
+
+      if (targetType === 'specific' && parsedUserIds.length > 0) {
+        whereClause.id = { in: parsedUserIds };
       }
 
       let users = await prisma.user.findMany({

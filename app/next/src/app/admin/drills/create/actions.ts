@@ -30,11 +30,43 @@ export const createDrillAction = async (
     return { status: 'error', fieldErrors: fe };
   }
 
+  let targetUserIdsArray: string[] = [];
+  try {
+    const rawIds = parsed.data.targetUserIds;
+    if (rawIds) {
+      let current: unknown = rawIds;
+      while (typeof current === 'string' && (current.startsWith('[') || current.startsWith('"'))) {
+        const next = JSON.parse(current);
+        if (current === next) break;
+        current = next;
+      }
+      
+      if (Array.isArray(current)) {
+        targetUserIdsArray = current as string[];
+      } else if (typeof current === 'string') {
+        const cleaned = current
+          .replace(/^"+|"+$/g, '')
+          .replace(/\\"/g, '"')
+          .replace(/\\\\/g, '\\');
+        
+        if (cleaned.startsWith('[')) {
+          targetUserIdsArray = JSON.parse(cleaned);
+        } else if (cleaned.includes(',')) {
+          targetUserIdsArray = cleaned.split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+        } else {
+          targetUserIdsArray = [cleaned.trim().replace(/^"|"$/g, '')].filter(Boolean);
+        }
+      }
+    }
+  } catch {
+    targetUserIdsArray = [];
+  }
+
   const c = createContainer();
   const created = await c.drill.usecases.create({
     ...parsed.data,
     targetType: parsed.data.targetType as 'all' | 'specific' | 'random',
-    targetUserIds: parsed.data.targetUserIds ? JSON.parse(parsed.data.targetUserIds) : [],
+    targetUserIds: targetUserIdsArray,
     quiz: undefined,
     status: parsed.data.actionType as 'draft' | 'deliverable' | 'delivering',
   });
