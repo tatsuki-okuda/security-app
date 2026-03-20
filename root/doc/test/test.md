@@ -11,6 +11,23 @@
 - クイズ仕様: `doc/drills/quizSpecification.md`
 - 実装プラン: `root/plan/override.md`
 
+## SpecID運用（画面ID直下）
+- SpecIDのベースは `doc/screenConfiguration.md` の **見出しID**（例: `Admin3-2` / `General1-1`）とする。
+- 曖昧/曖昧さを分解したいときは、ベースIDに **補助タグ**を付与して SpecID を細分化する。
+  - 形式: `screenId.tag`（例: `Admin3-2.required` / `Admin3-2.transitions` / `Admin3-2.ui`）
+- 「曖昧/グレー」でテスト化できない仕様は、ハーネス出力側で `skip` または `provisional` 扱いにし、evidence（未確定点・参照ドキュメント・決めるべき質問）を必ず書く。
+
+## ハーネス出力（Markdownレポート）
+最終的なチェック出力は Markdown のみとし、SpecIDごとに 1ブロックで `pass / fail / skip / provisional` を明示する。
+
+### 出力テンプレ（各SpecIDブロック）
+- `SpecID`: `<screenId>[.tag]`
+- `Status`: `pass | fail | skip | provisional`
+- `Constraints(evidence)`: 静的解析/AIレビューの結果（失敗なら何がNGか）
+- `Harness(evidence)`: 該当テスト（vitest等）と結果、失敗なら失敗観点/行
+- `HumanQA(evidence)`: 人の確認観点と根拠（手動チェック時に埋める）
+- `NextActions`: 修正する場合は対象（SpecID単位）だけを書き、再実行までの指示も含める
+
 ## テストレベルの定義
 - **unit (domain/validators)**: 値オブジェクト・純粋関数・zod schema の入力制約を検証。
 - **usecase**: DTO 入出力と gateway モックで業務フローを検証。
@@ -59,5 +76,5 @@
 ## 運用メモ
 - 新規テストドキュメント追加時は `doc/README.md` のディレクトリ・テーブルに追記する。
 - 将来機能（シナリオ管理、配信ジョブ）は pending/skip として枠を用意し、実装後に具体化する。
-- 画面 ID（例: Admin1-1）は `screenConfiguration.md` の見出しと揃えてトレーサビリティを確保する。
+- SpecID（例: `Admin1-1` / `Admin3-2.required`）は `screenConfiguration.md` の見出しIDと揃え、補助タグ側を含めてトレーサビリティを確保する。
 

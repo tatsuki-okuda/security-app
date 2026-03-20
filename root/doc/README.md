@@ -4,6 +4,11 @@
 
 Security Drillアプリケーションの各種ドキュメント、設計書、仕様を管理している。
 
+### AI / Cursor 向け
+
+- **実装依頼の型**: [changePacket.md](./changePacket.md)（SpecID・制約・テスト・承認の入出力）
+- **エージェント手順**: リポジトリ直下の [AGENTS.md](../../AGENTS.md) → プロジェクト Skill（`.cursor/skills/security-app-implement-request/`・`security-app-doc-update/`）
+
 ---
 
 ## ディレクトリ構成
@@ -36,9 +41,13 @@ doc/
 │   ├── podman.md（コンテナ環境構築）
 │   └── style.md（コーディング規約）
 │
+├── presentation/ ★ 発表用スライド
+│   └── slides.md（Security Drill 発表スライド・Marp 等で表示可）
+│
 ├── next.md（Next.js / React 実装ガイド）
 ├── QA.md ★ 開発時のQ&A・テスト手順
-└── tmp.md（作業メモ・旧ドラフト ※最新版は screenConfiguration 参照）
+└── changePacket.md ★ SpecIDベースの変更パケット（AI/テスト/承認用）
+（作業メモ用の `tmp.md` は任意。未使用なら置かない。正規の画面仕様は `screenConfiguration.md`）
 ```
 
 ---
@@ -104,6 +113,12 @@ doc/
 |-----------|------|--------|
 | [infrastructure/podman.md](./infrastructure/podman.md) | Podman環境構築（ローカルSMTP: Mailpit を含む） | 開発者・DevOps |
 
+### 発表・資料
+
+| ドキュメント | 説明 | 対象者 |
+|-----------|------|--------|
+| [presentation/slides.md](./presentation/slides.md) | Security Drill 発表用スライド（Markdown・Marp 等で表示可） | 全員 |
+
 ### 資料・アセット
 
 | ドキュメント | 説明 | 対象者 |
@@ -117,7 +132,7 @@ doc/
 | ドキュメント | 説明 | 対象者 |
 |-----------|------|--------|
 | [QA.md](./QA.md) | 開発時のQ&A、ローカル環境でのテスト手順など | 開発者 |
-| [tmp.md](./tmp.md) | 画面ドラフト・作業メモ（最新版は screenConfiguration を参照） | 開発者 |
+| [changePacket.md](./changePacket.md) | SpecIDベースの変更パケット（AI/テスト/承認用） | 開発者・AI担当 |
 
 ---
 
@@ -155,7 +170,7 @@ doc/
 - ドキュメント変更時は対応する別ドキュメントのリンクも更新する
 - 新規ドキュメントや画像追加時は、このファイルの該当テーブル（ドキュメント一覧／アセット）と screenConfiguration.md の「関連ドキュメント」セクションに追加
 - 大きな仕様変更は複数ドキュメントに影響することが多いため、必ず全関連ドキュメントを確認
-- tmp.md は作業メモ（ドラフト）。確定した内容は screenConfiguration.md / architecture.md / database.md など正規ドキュメントへ反映する
+- 作業メモ・ドラフトは必要ならローカル・issue、または任意の `tmp.md` に置く。確定した内容は screenConfiguration.md / architecture.md / database.md など正規ドキュメントへ反映する
 
 ---
 
@@ -173,6 +188,7 @@ doc/
 - **コーディング規約・命名** → infrastructure/style.md
 - **環境構築** → infrastructure/podman.md
 - **図・ダイアグラム** → assets 配下（architecture-dependency.png / drill-status-flow.png / ui-presentation-split.png）
-- **作業メモ・ドラフト** → tmp.md（最新版は screenConfiguration.md を参照）
+- **発表スライド** → presentation/slides.md
+- **作業メモ・ドラフト** → ローカル・issue または任意の tmp.md（正規は screenConfiguration.md 等）
 
 ---

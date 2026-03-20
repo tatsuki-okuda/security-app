@@ -1,0 +1,7 @@
+---
+description: アーキテクチャ不変条件（責務分離・認証認可・配置ルール）
+globs: "{app/**, src/**, root/doc/**/*.md}"
+alwaysApply: false
+---
+ルール本文は `/.agents/rules/architecture_invariants.md` を参照してください。
+
