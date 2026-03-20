@@ -12,7 +12,9 @@
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
     "check": "npm run prettier && npm run lint",
     "fix": "npm run prettier:fix && npm run lint:fix",
-    "test": "vitest"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "verify": "npm run check && npm run test:run"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

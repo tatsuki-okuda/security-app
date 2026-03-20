@@ -537,6 +537,7 @@
 - [認証・認可仕様](./auth.md)
 - [訓練ステータス遷移フロー](./drills/drillStatusFlow.md)
 - [セキュリティクイズ仕様](./drills/quizSpecification.md)
+- [変更パケット（SpecIDベース）](./changePacket.md)
 - [実装プラン](../plan/override.md)
 
 ---
